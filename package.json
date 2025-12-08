@@ -8,16 +8,7 @@
     "build": "vite build",
     "build:dev": "vite build --mode development",
     "lint": "eslint .",
-    "preview": "vite preview",
-    "vercel-build": "cd backend && npm install && npx prisma generate && cd .. && npm run build",
-    "postinstall": "cd backend && npm install",
-    "prisma": "cd backend && npx prisma",
-    "prisma:migrate": "cd backend && npx prisma migrate dev",
-    "prisma:migrate:deploy": "cd backend && npx prisma migrate deploy",
-    "prisma:migrate:reset": "cd backend && npx prisma migrate reset --force",
-    "prisma:generate": "cd backend && npx prisma generate",
-    "prisma:studio": "cd backend && npx prisma studio",
-    "prisma:seed": "cd backend && npm run seed"
+    "preview": "vite preview"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",
