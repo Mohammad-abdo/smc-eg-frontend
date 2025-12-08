@@ -1,17 +1,9 @@
 // API Service for Dashboard
-// For Vercel deployment:
-// - If backend is on same domain: use '/api'
-// - If backend is separate: use full URL like 'https://your-backend.railway.app/api'
-// - For local dev: use 'http://localhost:3001/api'
+// Backend is hosted on Railway: https://smc-eg-production.up.railway.app/api
 // 
-// IMPORTANT: Set VITE_API_URL in Vercel Environment Variables:
-// - For same domain: VITE_API_URL=/api
-// - For separate domain: VITE_API_URL=https://your-backend-domain.com/api
-const API_BASE_URL = import.meta.env.VITE_API_URL || 
-  (import.meta.env.PROD 
-    ? 'https://smc-eg-production.up.railway.app/api'  // Production: Railway backend
-    : 'http://localhost:3001/api'  // Local development
-  );
+// IMPORTANT: Set VITE_API_URL in Vercel Environment Variables if you need to override:
+// VITE_API_URL=https://smc-eg-production.up.railway.app/api
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://smc-eg-production.up.railway.app/api';
 
 // Types
 export interface ProductCategory {
@@ -188,15 +180,15 @@ async function apiCall<T>(endpoint: string, options?: RequestInit): Promise<T> {
   const cacheBuster = `_t=${timestamp}&_r=${random}&_v=${version}&_s=${sessionId}&_cb=${btoa(`${timestamp}-${random}`)}`;
   const url = `${API_BASE_URL}${endpoint}`;
   
-  // Log API call in development
-  if (import.meta.env.DEV) {
-    console.log('API Call:', {
-      method: options?.method || 'GET',
-      url,
-      endpoint,
-      apiBaseUrl: API_BASE_URL,
-    });
-  }
+  // Log API call in development and production (for debugging)
+  console.log('API Call:', {
+    method: options?.method || 'GET',
+    url,
+    endpoint,
+    apiBaseUrl: API_BASE_URL,
+    isProd: import.meta.env.PROD,
+    envApiUrl: import.meta.env.VITE_API_URL,
+  });
   
   let response: Response;
   try {
