@@ -1,61 +1,15 @@
 {
-  "buildCommand": "cd backend && npm install && npx prisma generate && cd .. && npm run build",
+  "buildCommand": "npm run build",
   "outputDirectory": "dist",
   "framework": "vite",
   "installCommand": "npm install",
-  "functions": {
-    "api/index.js": {
-      "maxDuration": 30
-    }
-  },
   "rewrites": [
-    {
-      "source": "/api/(.*)",
-      "destination": "/api/index.js"
-    },
     {
       "source": "/(.*)",
       "destination": "/index.html"
     }
   ],
   "headers": [
-    {
-      "source": "/api/(.*)",
-      "headers": [
-        {
-          "key": "Cache-Control",
-          "value": "no-cache, no-store, must-revalidate, max-age=0, private, s-maxage=0"
-        },
-        {
-          "key": "Pragma",
-          "value": "no-cache"
-        },
-        {
-          "key": "Expires",
-          "value": "0"
-        },
-        {
-          "key": "X-Vercel-Cache-Control",
-          "value": "no-cache"
-        },
-        {
-          "key": "CDN-Cache-Control",
-          "value": "no-cache"
-        },
-        {
-          "key": "Vercel-CDN-Cache-Control",
-          "value": "no-cache"
-        },
-        {
-          "key": "Surrogate-Control",
-          "value": "no-store"
-        },
-        {
-          "key": "Vary",
-          "value": "*"
-        }
-      ]
-    },
     {
       "source": "/(.*)",
       "headers": [
