@@ -1,0 +1,183 @@
+import { Link } from 'react-router-dom';
+import { Facebook, Linkedin, Phone, Mail } from 'lucide-react';
+import { useLanguage } from '@/contexts/LanguageContext';
+import { useSettings, usePageContent } from '@/hooks/usePageContent';
+import { cn } from '@/lib/utils';
+import smcLogo from '@/assets/manganese/logo.png';
+import whatsappIcon from '@/assets/manganese/icons8-whatsapp-logo-64.png';
+
+const Footer = () => {
+  const { t, isRTL } = useLanguage();
+  const currentYear = new Date().getFullYear();
+  const settings = useSettings();
+  const footerDescription = usePageContent('footer', 'description', t('footerDescription'));
+  const quickLinks = usePageContent('footer', 'quickLinks', t('quickLinks'));
+  const followUs = usePageContent('footer', 'followUs', t('followUs'));
+
+  const footerNavigation = [
+    { name: t('home'), href: '/' },
+    { name: t('about'), href: '/about' },
+    { name: t('products'), href: '/products' },
+    { name: t('news'), href: '/news' },
+  ];
+
+  return (
+    <footer className="bg-[#204393] text-white">
+      <div className="relative overflow-hidden">
+        <div className="absolute inset-0 opacity-40">
+          <div className="h-full w-full bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.15),_transparent_55%)]" />
+        </div>
+        <div className="relative container mx-auto px-4 py-14">
+          <div className={cn('grid gap-10 lg:grid-cols-4', isRTL && 'text-right')}>
+            {/* Column 1: Phone Numbers */}
+            <div>
+              <h3 className="mb-4 text-xs font-semibold uppercase tracking-[0.4em] text-white/90">
+                {isRTL ? 'أرقام المبيعات' : 'Sales Numbers'}
+              </h3>
+              <div className="space-y-3 mb-6">
+                <a 
+                  href="tel:25200705020" 
+                  className={cn('flex items-center gap-3 text-white/70 hover:text-white transition', isRTL && 'flex-row-reverse')}
+                >
+                  <Phone className="h-5 w-5 text-primary flex-shrink-0" />
+                  <span>25200705020</span>
+                </a>
+                <a 
+                  href="tel:25222155555"
+                  className={cn('flex items-center gap-3 text-white/70 hover:text-white transition', isRTL && 'flex-row-reverse')}
+                >
+                  <Phone className="h-5 w-5 text-primary flex-shrink-0" />
+                  <span>25222155555</span>
+                </a>
+                <a 
+                  href="tel:25555211210"
+                  className={cn('flex items-center gap-3 text-white/70 hover:text-white transition', isRTL && 'flex-row-reverse')}
+                >
+                  <Phone className="h-5 w-5 text-primary flex-shrink-0" />
+                  <span>25555211210</span>
+                </a>
+              </div>
+              <h3 className="mb-4 text-xs font-semibold uppercase tracking-[0.4em] text-white/90">
+                {isRTL ? 'أرقام الإدارة' : 'Administration Numbers'}
+              </h3>
+              <div className="space-y-3">
+                <a 
+                  href="tel:51702505" 
+                  className={cn('flex items-center gap-3 text-white/70 hover:text-white transition', isRTL && 'flex-row-reverse')}
+                >
+                  <Phone className="h-5 w-5 text-primary flex-shrink-0" />
+                  <span>51702505</span>
+                </a>
+                <a 
+                  href="tel:51702557"
+                  className={cn('flex items-center gap-3 text-white/70 hover:text-white transition', isRTL && 'flex-row-reverse')}
+                >
+                  <Phone className="h-5 w-5 text-primary flex-shrink-0" />
+                  <span>51702557</span>
+                </a>
+                <a 
+                  href="tel:51705202"
+                  className={cn('flex items-center gap-3 text-white/70 hover:text-white transition', isRTL && 'flex-row-reverse')}
+                >
+                  <Phone className="h-5 w-5 text-primary flex-shrink-0" />
+                  <span>51705202</span>
+                </a>
+              </div>
+              <div className="mt-6 pt-6 border-t border-white/10">
+                <a 
+                  href="mailto:info1@smc-eg.com" 
+                  className={cn('flex items-center gap-3 text-white/70 hover:text-white transition', isRTL && 'flex-row-reverse')}
+                >
+                  <Mail className="h-5 w-5 text-primary flex-shrink-0" />
+                  <span className="text-sm">info1@smc-eg.com</span>
+                  <span className="text-xs text-white/50">({isRTL ? 'للشكاوى' : 'For Complaints'})</span>
+                </a>
+              </div>
+            </div>
+
+            {/* Column 2: Logo and Description */}
+            <div className="space-y-4">
+              <div className="flex items-center gap-4">
+                <img src={smcLogo} alt="Sinai Manganese Co." className="h-14 w-auto object-contain drop-shadow-xl" />
+                <div>
+                  <p className="text-xl font-semibold">{settings.siteName}</p>
+                  <p className="text-xs text-white/70">Since 1957</p>
+                </div>
+              </div>
+              <p className="text-sm text-white/70 leading-relaxed">{footerDescription}</p>
+            </div>
+
+            {/* Column 3: Navigation Links */}
+            <div>
+              <h3 className="mb-6 text-xs font-semibold uppercase tracking-[0.4em] text-white/90">
+                {quickLinks}
+              </h3>
+              <div className="space-y-3">
+                {footerNavigation.map((item) => (
+                  <Link 
+                    key={item.name} 
+                    to={item.href} 
+                    className="block text-white/70 hover:text-white transition"
+                  >
+                    {item.name}
+                  </Link>
+                ))}
+              </div>
+            </div>
+
+            {/* Column 4: Social Media Icons with Names */}
+            <div>
+              <h3 className="mb-6 text-xs font-semibold uppercase tracking-[0.4em] text-white/90">
+                {followUs}
+              </h3>
+              <div className="space-y-4">
+                {settings.facebook && (
+                  <a
+                    href={settings.facebook}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={cn('flex items-center gap-3 text-white/70 hover:text-white transition', isRTL && 'flex-row-reverse')}
+                  >
+                    <Facebook className="h-5 w-5 text-primary flex-shrink-0" />
+                    <span>Facebook</span>
+                  </a>
+                )}
+                <a
+                  href="https://wa.me/201282055059"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={cn('flex items-center gap-3 text-white/70 hover:text-white transition', isRTL && 'flex-row-reverse')}
+                >
+                  <img src={whatsappIcon} alt="WhatsApp" className="h-5 w-5 object-contain flex-shrink-0" />
+                  <span>WhatsApp</span>
+                </a>
+                {settings.linkedin && (
+                  <a
+                    href={settings.linkedin}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={cn('flex items-center gap-3 text-white/70 hover:text-white transition', isRTL && 'flex-row-reverse')}
+                  >
+                    <Linkedin className="h-5 w-5 text-primary flex-shrink-0" />
+                    <span>LinkedIn</span>
+                  </a>
+                )}
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-10 flex flex-col gap-3 border-t border-white/10 pt-6 text-sm text-white/60 lg:flex-row lg:items-center lg:justify-between">
+            <p>© {currentYear} {settings.siteName}. {t('allRightsReserved')}. {isRTL ? 'صمم بواسطة' : 'Designed by'} <a href="https://qeematech.com" target="_blank" rel="noopener noreferrer" className="hover:text-white underline">QeemaTech</a></p>
+            <div className="flex flex-wrap gap-4 text-xs uppercase tracking-[0.3em] text-white/40">
+              <span>{t('contactHeadOfficeLabel')}</span>
+              <span>{quickLinks}</span>
+              <span>{followUs}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </footer>
+  );
+};
+
+export default Footer;

@@ -1,0 +1,5 @@
+# Don't ignore api/ and backend/ - they are needed for Vercel deployment
+# api/
+# backend/
+data/
+
