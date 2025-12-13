@@ -508,7 +508,7 @@ export const useClients = (includeInactive: boolean = false) => {
       try {
         // Use clientsAPI but we need to handle the status parameter
         // Since clientsAPI.getAll() doesn't accept params, we'll use fetch directly but ensure proper error handling
-        const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://smc-eg-production.up.railway.app/api';
+        const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://smc-eg.com/api';
         const url = includeInactive ? `${API_BASE_URL}/clients?status=all` : `${API_BASE_URL}/clients`;
         const response = await fetch(url);
         if (!response.ok) {

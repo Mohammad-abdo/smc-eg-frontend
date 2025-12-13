@@ -1,8 +1,8 @@
 // API Service for Dashboard
-// Backend is hosted on Railway: https://smc-eg-production.up.railway.app/api
+// Backend is hosted at: https://smc-eg.com/api
 // 
 // IMPORTANT: Set VITE_API_URL in Vercel Environment Variables if you need to override:
-// VITE_API_URL=https://smc-eg-production.up.railway.app/api
+// VITE_API_URL=https://smc-eg.com/api
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://smc-eg.com/api';
 
 // Types
@@ -214,9 +214,9 @@ async function apiCall<T>(endpoint: string, options?: RequestInit): Promise<T> {
     cache: 'no-store', // Prevent browser caching
     credentials: 'omit', // Don't send cookies that might affect caching
     });
-  } catch (networkError: any) {
+  } catch (networkError: unknown) {
     // Network error (no internet, CORS, etc.)
-    const errorMessage = networkError?.message || 'Network request failed';
+    const errorMessage = (networkError instanceof Error ? networkError.message : String(networkError)) || 'Network request failed';
     const isCorsError = errorMessage.includes('CORS') || errorMessage.includes('cors') || errorMessage.includes('Access-Control');
     const isConnectionError = errorMessage.includes('Failed to fetch') || errorMessage.includes('NetworkError') || errorMessage.includes('ERR_');
     

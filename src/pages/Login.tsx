@@ -22,8 +22,8 @@ const Login = () => {
     setLoading(true);
 
     try {
-      // Get API base URL - always use Railway backend
-      const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://smc-eg-production.up.railway.app/api';
+      // Get API base URL - always use smc-eg.com backend
+      const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://smc-eg.com/api';
 
       // Call login API
       const response = await fetch(`${API_BASE_URL}/auth/login`, {
