@@ -22,8 +22,8 @@ const Login = () => {
     setLoading(true);
 
     try {
-      // Get API base URL - use localhost in development, smc-eg.com in production
-      const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+      // Get API base URL - always use back.smc-eg.com backend
+      const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://back.smc-eg.com/api';
 
       // Call login API
       const response = await fetch(`${API_BASE_URL}/auth/login`, {
@@ -50,9 +50,10 @@ const Login = () => {
       } else {
         throw new Error('Invalid response from server');
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Login error:', error);
-      toast.error(error.message || t('loginError') || 'Invalid email or password');
+      const errorMessage = (error instanceof Error ? error.message : String(error)) || t('loginError') || 'Invalid email or password';
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }

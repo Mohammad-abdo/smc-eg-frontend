@@ -44,7 +44,7 @@ npm install
 npm start
 ```
 
-The backend runs on `http://localhost:3000` by default.
+The backend runs on `https://back.smc-eg.com/api` by default.
 
 ## Environment Variables
 

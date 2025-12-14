@@ -24,7 +24,7 @@ app.use(cors({
     'https://smc-frontend-weld.vercel.app',  // Frontend على Vercel (Production)
     'http://localhost:8080',                  // للـ local development (Vite default)
     'http://localhost:5173',                  // للـ local development (Vite alternative)
-    'http://localhost:3000',                  // للـ local development (alternative)
+    'https://back.smc-eg.com',                // Backend API server
   ],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
@@ -55,7 +55,7 @@ app.use(cors({
       'https://smc-frontend-weld.vercel.app',  // Production frontend
       'http://localhost:8080',                 // Local development (Vite default)
       'http://localhost:5173',                 // Local development (Vite alternative)
-      'http://localhost:3000',                // Local development (alternative)
+      'https://back.smc-eg.com',              // Backend API server
     ];
     
     // السماح بطلبات بدون origin (مثل Postman أو mobile apps)
@@ -172,7 +172,7 @@ const corsOptions = {
     'https://smc-frontend-weld.vercel.app',  // Production frontend
     'http://localhost:8080',                 // Local development (Vite default)
     'http://localhost:5173',                 // Local development (Vite alternative)
-    'http://localhost:3000',                // Local development (alternative)
+    'https://back.smc-eg.com',              // Backend API server
   ],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],

@@ -510,7 +510,7 @@ export const useClients = (includeInactive: boolean = false) => {
       if (USE_MOCK_API) return [];
       try {
         // Use the same API_BASE_URL as other API calls
-        const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+        const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://back.smc-eg.com/api';
         const url = includeInactive ? `${API_BASE_URL}/clients?status=all` : `${API_BASE_URL}/clients`;
         const response = await fetch(url);
         if (!response.ok) {
