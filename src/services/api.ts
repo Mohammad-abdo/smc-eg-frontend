@@ -3,7 +3,7 @@
 // 
 // IMPORTANT: Set VITE_API_URL in Vercel Environment Variables if you need to override:
 // VITE_API_URL=https://smc-eg.com/api
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://smc-eg.com/api';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
 // Types
 export interface ProductCategory {
@@ -217,14 +217,24 @@ async function apiCall<T>(endpoint: string, options?: RequestInit): Promise<T> {
   } catch (networkError: unknown) {
     // Network error (no internet, CORS, etc.)
     const errorMessage = (networkError instanceof Error ? networkError.message : String(networkError)) || 'Network request failed';
-    const isCorsError = errorMessage.includes('CORS') || errorMessage.includes('cors') || errorMessage.includes('Access-Control');
-    const isConnectionError = errorMessage.includes('Failed to fetch') || errorMessage.includes('NetworkError') || errorMessage.includes('ERR_');
+    const errorString = String(networkError).toLowerCase();
+    
+    // Check for CORS errors - "Failed to fetch" with CORS policy message is usually CORS
+    const isCorsError = errorMessage.includes('CORS') || 
+                       errorMessage.includes('cors') || 
+                       errorMessage.includes('Access-Control') ||
+                       (errorMessage.includes('Failed to fetch') && errorString.includes('cors')) ||
+                       (errorMessage.includes('Failed to fetch') && typeof window !== 'undefined' && window.location.origin !== new URL(API_BASE_URL).origin);
+    
+    const isConnectionError = errorMessage.includes('Failed to fetch') || 
+                             errorMessage.includes('NetworkError') || 
+                             errorMessage.includes('ERR_');
     
     let userFriendlyMessage = '';
     if (isCorsError) {
-      userFriendlyMessage = 'CORS error: Backend is not allowing requests from this origin. Please check backend CORS settings.';
+      userFriendlyMessage = `CORS Error: The backend at ${API_BASE_URL} is not allowing requests from ${typeof window !== 'undefined' ? window.location.origin : 'this origin'}. Please configure CORS on the backend to allow requests from your frontend domain. See CORS_FIX_GUIDE.md for instructions.`;
     } else if (isConnectionError) {
-      userFriendlyMessage = `Connection failed: Cannot reach the backend server. Please ensure the backend is running and accessible at ${API_BASE_URL}.`;
+      userFriendlyMessage = `Connection failed: Cannot reach the backend server at ${API_BASE_URL}. Please ensure the backend is running and accessible.`;
     } else {
       userFriendlyMessage = `Network error: ${errorMessage}. Please check your internet connection and ensure the backend is running at ${API_BASE_URL}.`;
     }

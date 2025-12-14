@@ -64,9 +64,17 @@ const ProductDetail = () => {
   };
   const ProductIcon = product ? iconMap[product.name] : Factory;
   // Use product.image if it exists and is not empty, otherwise undefined (show placeholder)
-  const productImage = (product?.image && product.image.trim() !== '') 
-    ? product.image 
-    : undefined;
+  // Handle both base64 data URIs and regular URLs
+  const productImage = useMemo(() => {
+    if (!product?.image || typeof product.image !== 'string') {
+      return undefined;
+    }
+    const trimmed = product.image.trim();
+    if (trimmed === '' || trimmed === 'null' || trimmed === 'undefined') {
+      return undefined;
+    }
+    return trimmed;
+  }, [product?.image]);
 
   if (isLoading) {
     return (
@@ -134,17 +142,23 @@ const ProductDetail = () => {
               <div className="relative h-96 lg:h-[500px] overflow-hidden rounded-[32px] border border-border shadow-2xl bg-muted">
                 {productImage ? (
                   <img
-                    src={productImage.includes('data:image') ? `${productImage}` : `${productImage}${productImage.includes('?') ? '&' : '?'}_cb=${Date.now()}`}
+                    src={productImage.startsWith('data:image') || productImage.startsWith('data:') 
+                      ? productImage 
+                      : `${productImage}${productImage.includes('?') ? '&' : '?'}_cb=${Date.now()}`}
                     alt={productName || 'Product image'}
                     className="h-full w-full object-cover"
                     key={`${productId}-${product?.updated_at || Date.now()}`}
                     onError={(e) => {
+                      console.error('Image load error:', productImage?.substring(0, 50));
                       const target = e.target as HTMLImageElement;
                       target.style.display = 'none';
                       const placeholder = target.nextElementSibling as HTMLElement;
                       if (placeholder && placeholder.classList.contains('placeholder-fallback')) {
                         placeholder.style.display = 'flex';
                       }
+                    }}
+                    onLoad={() => {
+                      console.log('Image loaded successfully:', productImage?.substring(0, 50));
                     }}
                   />
                 ) : null}
@@ -170,10 +184,15 @@ const ProductDetail = () => {
                     <div className="relative w-full h-96 lg:h-[500px] overflow-hidden rounded-lg border border-border shadow-lg">
                       {productGallery[selectedGalleryIndex] && (
                         <img
-                          src={productGallery[selectedGalleryIndex].includes('data:image') ? productGallery[selectedGalleryIndex] : `${productGallery[selectedGalleryIndex]}${productGallery[selectedGalleryIndex].includes('?') ? '&' : '?'}_cb=${Date.now()}`}
+                          src={productGallery[selectedGalleryIndex].startsWith('data:image') || productGallery[selectedGalleryIndex].startsWith('data:')
+                            ? productGallery[selectedGalleryIndex]
+                            : `${productGallery[selectedGalleryIndex]}${productGallery[selectedGalleryIndex].includes('?') ? '&' : '?'}_cb=${Date.now()}`}
                           alt={`${productName} - Image ${selectedGalleryIndex + 1}`}
                           className="w-full h-full object-contain bg-muted/30"
                           key={`gallery-${selectedGalleryIndex}-${Date.now()}`}
+                          onError={(e) => {
+                            console.error('Gallery image load error:', productGallery[selectedGalleryIndex]?.substring(0, 50));
+                          }}
                         />
                       )}
                     </div>
@@ -198,7 +217,7 @@ const ProductDetail = () => {
                             )}
                           >
                             <img
-                              src={img.includes('data:image') ? img : `${img}${img.includes('?') ? '&' : '?'}_cb=${Date.now()}`}
+                              src={img.startsWith('data:image') || img.startsWith('data:') ? img : `${img}${img.includes('?') ? '&' : '?'}_cb=${Date.now()}`}
                               alt={`${productName} - Thumbnail ${index + 1}`}
                               className="w-full h-full object-cover"
                               key={`thumb-${index}-${Date.now()}`}

@@ -22,8 +22,8 @@ const Login = () => {
     setLoading(true);
 
     try {
-      // Get API base URL - always use smc-eg.com backend
-      const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://smc-eg.com/api';
+      // Get API base URL - use localhost in development, smc-eg.com in production
+      const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
       // Call login API
       const response = await fetch(`${API_BASE_URL}/auth/login`, {

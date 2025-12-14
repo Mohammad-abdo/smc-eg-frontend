@@ -316,7 +316,9 @@ const Products = ({ type }: ProductsProps) => {
                     <div className="relative h-64 overflow-hidden bg-muted">
                       {product.image ? (
                         <img
-                          src={product.image.includes('data:image') ? product.image : `${product.image}${product.image.includes('?') ? '&' : '?'}_cb=${product.updated_at ? new Date(product.updated_at).getTime() : Date.now()}`}
+                          src={product.image.startsWith('data:image') || product.image.startsWith('data:') 
+                            ? product.image 
+                            : `${product.image}${product.image.includes('?') ? '&' : '?'}_cb=${product.updated_at ? new Date(product.updated_at).getTime() : Date.now()}`}
                           alt={product.name}
                           className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
                           loading="lazy"

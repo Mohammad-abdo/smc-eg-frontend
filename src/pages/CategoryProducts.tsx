@@ -105,11 +105,18 @@ const CategoryProducts = () => {
                     <div className="relative h-64 overflow-hidden bg-muted">
                       {productImage ? (
                         <img
-                          src={productImage.includes('data:image') ? productImage : `${productImage}${productImage.includes('?') ? '&' : '?'}_cb=${product.updated_at ? new Date(product.updated_at).getTime() : Date.now()}`}
+                          src={productImage.startsWith('data:image') || productImage.startsWith('data:')
+                            ? productImage
+                            : `${productImage}${productImage.includes('?') ? '&' : '?'}_cb=${product.updated_at ? new Date(product.updated_at).getTime() : Date.now()}`}
                           alt={language === 'ar' ? product.nameAr : product.name}
                           className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
                           loading="lazy"
                           key={`${product.id}-${product.updated_at || Date.now()}`}
+                          onError={(e) => {
+                            console.error('Category product image load error');
+                            const target = e.target as HTMLImageElement;
+                            target.style.display = 'none';
+                          }}
                         />
                       ) : (
                         <div className="h-full w-full flex items-center justify-center bg-muted">

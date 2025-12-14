@@ -288,6 +288,9 @@ export const useMedia = () => {
   return useQuery({
     queryKey: ['media'],
     queryFn: () => USE_MOCK_API ? mockApi.media.getAll() : mediaAPI.getAll(),
+    retry: 1, // Only retry once to prevent infinite loops
+    retryDelay: 1000, // Wait 1 second before retry
+    staleTime: 5 * 60 * 1000, // Consider data stale after 5 minutes
   });
 };
 
@@ -506,9 +509,8 @@ export const useClients = (includeInactive: boolean = false) => {
     queryFn: async () => {
       if (USE_MOCK_API) return [];
       try {
-        // Use clientsAPI but we need to handle the status parameter
-        // Since clientsAPI.getAll() doesn't accept params, we'll use fetch directly but ensure proper error handling
-        const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://smc-eg.com/api';
+        // Use the same API_BASE_URL as other API calls
+        const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
         const url = includeInactive ? `${API_BASE_URL}/clients?status=all` : `${API_BASE_URL}/clients`;
         const response = await fetch(url);
         if (!response.ok) {
@@ -530,6 +532,7 @@ export const useClients = (includeInactive: boolean = false) => {
     refetchOnMount: true,
     staleTime: 0,
     gcTime: 0, // Don't cache at all
+    retry: 1, // Only retry once to prevent infinite loops
   });
 };
 
