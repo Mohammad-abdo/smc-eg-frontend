@@ -85,7 +85,7 @@ const Home = () => {
       document.body.style.overflow = 'unset';
     };
   }, [selectedImageIndex]);
-  
+
   // Fetch data from API
   const { data: products = [], isLoading: productsLoading } = useProducts();
   const { data: categories = [] } = useProductCategories();
@@ -93,11 +93,11 @@ const Home = () => {
   const { data: news = [], isLoading: newsLoading } = useNews();
   // Get client logos from settings instead of API
   const [clientLogos, setClientLogos] = useState<string[]>([]);
-  
+
   useEffect(() => {
     // Check if we're in browser environment
     if (typeof window === 'undefined') return;
-    
+
     const loadClientLogos = () => {
       try {
         const saved = localStorage.getItem('siteSettings');
@@ -111,12 +111,12 @@ const Home = () => {
         console.error('Error loading client logos:', error);
       }
     };
-    
+
     loadClientLogos();
     // Listen for storage changes
     window.addEventListener('storage', loadClientLogos);
     window.addEventListener('settingsUpdated', loadClientLogos);
-    
+
     return () => {
       window.removeEventListener('storage', loadClientLogos);
       window.removeEventListener('settingsUpdated', loadClientLogos);
@@ -141,10 +141,10 @@ const Home = () => {
   }, [api]);
 
   // Find main categories
-  const industrialCategory = categories.find(cat => 
+  const industrialCategory = categories.find(cat =>
     (cat.slug === 'industrial' || cat.name.toLowerCase().includes('industrial')) && !cat.parent_id
   );
-  const miningCategory = categories.find(cat => 
+  const miningCategory = categories.find(cat =>
     (cat.slug === 'mining' || cat.name.toLowerCase().includes('mining')) && !cat.parent_id
   );
 
@@ -153,8 +153,8 @@ const Home = () => {
     .filter(p => {
       if (p.status !== 'active') return false;
       // Check if product belongs to industrial main category
-      return p.category_id === industrialCategory?.id || 
-             (p.category === 'Industrial' && !p.category_id);
+      return p.category_id === industrialCategory?.id ||
+        (p.category === 'Industrial' && !p.category_id);
     })
     .sort((a, b) => b.id - a.id) // Sort by ID descending (newest first)
     .slice(0, 3);
@@ -164,8 +164,8 @@ const Home = () => {
     .filter(p => {
       if (p.status !== 'active') return false;
       // Check if product belongs to mining main category
-      return p.category_id === miningCategory?.id || 
-             (p.category === 'Mining' && !p.category_id);
+      return p.category_id === miningCategory?.id ||
+        (p.category === 'Mining' && !p.category_id);
     })
     .sort((a, b) => b.id - a.id) // Sort by ID descending (newest first)
     .slice(0, 3);
@@ -183,15 +183,15 @@ const Home = () => {
   const miningProductsDescription = usePageContent('home', 'miningProductsDescription', t('miningProductsDescription'));
 
   // Use banners from API if available, otherwise use default slides
-  const activeBanners = banners.length > 0 
+  const activeBanners = banners.length > 0
     ? banners.filter(b => b.active).sort((a, b) => a.order - b.order)
-    : heroSlides.map((slide, idx) => ({ 
-        image: slide.src, 
-        title: '', 
-        subtitle: '', 
-        description: '',
-        id: idx 
-      }));
+    : heroSlides.map((slide, idx) => ({
+      image: slide.src,
+      title: '',
+      subtitle: '',
+      description: '',
+      id: idx
+    }));
 
   useEffect(() => {
     if (activeBanners.length > 0) {
@@ -313,7 +313,7 @@ const Home = () => {
       <section className="relative overflow-hidden border-b border-border min-h-[600px] flex items-center">
         <div className="absolute inset-0">
           {activeBanners.map((banner, index) => (
-          <img
+            <img
               key={banner.id || index}
               src={banner.image || heroSlides[index]?.src}
               alt={banner.title || heroSlides[index]?.alt || 'Hero banner'}
@@ -321,7 +321,7 @@ const Home = () => {
                 'absolute inset-0 h-full w-full object-cover transition-all ease-out scale-105',
                 index === activeSlide ? 'opacity-90 scale-100' : 'opacity-0'
               )}
-          />
+            />
           ))}
           {/* Dark overlay for better text readability */}
           <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/60 to-black/70" />
@@ -338,18 +338,18 @@ const Home = () => {
         <div className="relative container mx-auto flex flex-col gap-10 px-4 py-32 lg:flex-row lg:items-center z-10">
           <div className={cn('max-w-2xl space-y-6 py-10', isRTL && 'text-right')}>
             <p className="text-sm font-semibold uppercase tracking-[0.3em] text-white drop-shadow-lg">
-              {(activeBanners[activeSlide] as any)?.subtitleAr && language === 'ar' 
-                ? (activeBanners[activeSlide] as any).subtitleAr 
+              {(activeBanners[activeSlide] as any)?.subtitleAr && language === 'ar'
+                ? (activeBanners[activeSlide] as any).subtitleAr
                 : activeBanners[activeSlide]?.subtitle || heroSubtitle}
             </p>
             <h1 className="text-4xl font-bold leading-tight md:text-5xl text-white drop-shadow-lg">
-              {(activeBanners[activeSlide] as any)?.titleAr && language === 'ar' 
-                ? (activeBanners[activeSlide] as any).titleAr 
+              {(activeBanners[activeSlide] as any)?.titleAr && language === 'ar'
+                ? (activeBanners[activeSlide] as any).titleAr
                 : activeBanners[activeSlide]?.title || heroTitle}
             </h1>
             <p className="text-lg text-white/90 drop-shadow-md">
-              {(activeBanners[activeSlide] as any)?.descriptionAr && language === 'ar' 
-                ? (activeBanners[activeSlide] as any).descriptionAr 
+              {(activeBanners[activeSlide] as any)?.descriptionAr && language === 'ar'
+                ? (activeBanners[activeSlide] as any).descriptionAr
                 : activeBanners[activeSlide]?.description || heroDescription}
             </p>
             <div className={cn('flex flex-wrap gap-4', isRTL ? 'flex-row-reverse justify-end' : '')}>
@@ -398,12 +398,12 @@ const Home = () => {
               {language === 'ar' ? 'سبيكة السيلكون منجنيز' : 'Silicomanganese Alloy'}
             </h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              {language === 'ar' 
+              {language === 'ar'
                 ? 'سبيكة سيليكون منجنيز عالية الجودة تستخدم في إنتاج الصلب'
                 : 'High-quality silicomanganese ferroalloy used in steel production'}
             </p>
           </div>
-          
+
           {/* Large Main Image */}
           <div className="mb-6">
             <div className="relative w-full h-96 md:h-[500px] lg:h-[600px] overflow-hidden rounded-xl border border-border shadow-2xl bg-muted/30">
@@ -456,7 +456,7 @@ const Home = () => {
             <p className="text-sm uppercase tracking-[0.3em] text-primary mb-4">{t('usesTitle')}</p>
             <h2 className="text-4xl font-bold mb-4">{t('usesSubtitle')}</h2>
             <p className="text-lg text-muted-foreground">
-              {language === 'ar' 
+              {language === 'ar'
                 ? 'سبائك متعددة الاستخدامات للصناعات الحرجة'
                 : 'Versatile ferroalloys for critical industries'}
             </p>
@@ -505,7 +505,7 @@ const Home = () => {
       </section>
 
       {/* Removed: Energy Solutions */}
-      <section className="py-20">
+      {/*<section className="py-20">
         <div className="container mx-auto px-4">
           <div className={cn('mb-12 max-w-3xl', isRTL && 'text-right ml-auto')}>
             <p className="text-sm uppercase tracking-[0.3em] text-primary">{t('energyTitle')}</p>
@@ -541,7 +541,7 @@ const Home = () => {
             ))}
           </div>
         </div>
-      </section>
+      </section>*/}
 
       {/* Removed: Extended About, Family, Cases, Product & Sustainability sections */}
 
@@ -567,48 +567,48 @@ const Home = () => {
             ) : (
               <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                 {industrialProductsList.map((product) => {
-                    const iconMap: Record<string, any> = {
-                      'Silicomanganese': Factory,
-                      'Calcined Gypsum': Sparkles,
-                      'Kaolin': Beaker,
-                      'Silica Sand': Factory,
-                      'Raw Gypsum': Sparkles,
-                      'Iron Oxide': Flame,
-                      'Fine Manganese': Factory,
-                    };
-                    const ProductIcon = iconMap[product.name] || Factory;
-                    const defaultImages = [heroSlideOne, heroSlideTwo, heroSlideThree, mnHome, mnPortfolio14, mnPortfolio16];
-                    // Use product.image if it exists and is not empty, otherwise use default
-                    const productImage = (product.image && product.image.trim() !== '') 
-                      ? product.image 
-                      : defaultImages[product.id % defaultImages.length];
-                    
-                    return (
-                      <Link key={product.id} to={`/product/${product.id}`}>
-                        <Card className="group overflow-hidden border border-border shadow-lg transition-all hover:shadow-2xl hover:-translate-y-2 cursor-pointer">
-                          <div className="relative h-64 overflow-hidden">
-                            <img
-                              src={productImage.includes('data:image') ? productImage : `${productImage}${productImage.includes('?') ? '&' : '?'}_cb=${product.updated_at ? new Date(product.updated_at).getTime() : Date.now()}`}
-                              alt={language === 'ar' ? product.nameAr : product.name}
-                              className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
-                              loading="lazy"
-                              key={`${product.id}-${product.updated_at || Date.now()}`}
-                            />
-                            <div className="absolute inset-0 bg-gradient-to-t from-background/95 via-background/50 to-transparent" />
-                            <div className="absolute top-4 right-4 rounded-full bg-primary/90 p-3 backdrop-blur">
-                              <ProductIcon className="h-6 w-6 text-white" />
-                            </div>
+                  const iconMap: Record<string, any> = {
+                    'Silicomanganese': Factory,
+                    'Calcined Gypsum': Sparkles,
+                    'Kaolin': Beaker,
+                    'Silica Sand': Factory,
+                    'Raw Gypsum': Sparkles,
+                    'Iron Oxide': Flame,
+                    'Fine Manganese': Factory,
+                  };
+                  const ProductIcon = iconMap[product.name] || Factory;
+                  const defaultImages = [heroSlideOne, heroSlideTwo, heroSlideThree, mnHome, mnPortfolio14, mnPortfolio16];
+                  // Use product.image if it exists and is not empty, otherwise use default
+                  const productImage = (product.image && product.image.trim() !== '')
+                    ? product.image
+                    : defaultImages[product.id % defaultImages.length];
+
+                  return (
+                    <Link key={product.id} to={`/product/${product.id}`}>
+                      <Card className="group overflow-hidden border border-border shadow-lg transition-all hover:shadow-2xl hover:-translate-y-2 cursor-pointer">
+                        <div className="relative h-64 overflow-hidden">
+                          <img
+                            src={productImage.includes('data:image') ? productImage : `${productImage}${productImage.includes('?') ? '&' : '?'}_cb=${product.updated_at ? new Date(product.updated_at).getTime() : Date.now()}`}
+                            alt={language === 'ar' ? product.nameAr : product.name}
+                            className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
+                            loading="lazy"
+                            key={`${product.id}-${product.updated_at || Date.now()}`}
+                          />
+                          <div className="absolute inset-0 bg-gradient-to-t from-background/95 via-background/50 to-transparent" />
+                          <div className="absolute top-4 right-4 rounded-full bg-primary/90 p-3 backdrop-blur">
+                            <ProductIcon className="h-6 w-6 text-white" />
                           </div>
-                          <CardContent className="p-6">
-                            <h4 className="text-xl font-semibold mb-2">{language === 'ar' ? product.nameAr : product.name}</h4>
-                            <p className="text-sm text-muted-foreground leading-relaxed line-clamp-3">
-                              {language === 'ar' ? product.descriptionAr : product.description}
-                            </p>
-                          </CardContent>
-                        </Card>
-                      </Link>
-                    );
-                  })}
+                        </div>
+                        <CardContent className="p-6">
+                          <h4 className="text-xl font-semibold mb-2">{language === 'ar' ? product.nameAr : product.name}</h4>
+                          <p className="text-sm text-muted-foreground leading-relaxed line-clamp-3">
+                            {language === 'ar' ? product.descriptionAr : product.description}
+                          </p>
+                        </CardContent>
+                      </Card>
+                    </Link>
+                  );
+                })}
               </div>
             )}
             {industrialProductsList.length > 0 && (
@@ -636,48 +636,48 @@ const Home = () => {
             ) : (
               <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                 {miningProductsList.map((product) => {
-                    const iconMap: Record<string, any> = {
-                      'Silicomanganese': Factory,
-                      'Calcined Gypsum': Sparkles,
-                      'Kaolin': Beaker,
-                      'Silica Sand': Factory,
-                      'Raw Gypsum': Sparkles,
-                      'Iron Oxide': Flame,
-                      'Fine Manganese': Factory,
-                    };
-                    const ProductIcon = iconMap[product.name] || Factory;
-                    const defaultImages = [heroSlideOne, heroSlideTwo, heroSlideThree, mnHome, mnPortfolio14, mnPortfolio16];
-                    // Use product.image if it exists and is not empty, otherwise use default
-                    const productImage = (product.image && product.image.trim() !== '') 
-                      ? product.image 
-                      : defaultImages[product.id % defaultImages.length];
-                    
-                    return (
-                      <Link key={product.id} to={`/product/${product.id}`}>
-                        <Card className="group overflow-hidden border border-border shadow-lg transition-all hover:shadow-2xl hover:-translate-y-2 cursor-pointer">
-                          <div className="relative h-56 overflow-hidden">
-                            <img
-                              src={productImage.includes('data:image') ? productImage : `${productImage}${productImage.includes('?') ? '&' : '?'}_cb=${product.updated_at ? new Date(product.updated_at).getTime() : Date.now()}`}
-                              alt={language === 'ar' ? product.nameAr : product.name}
-                              className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
-                              loading="lazy"
-                              key={`${product.id}-${product.updated_at || Date.now()}`}
-                            />
-                            <div className="absolute inset-0 bg-gradient-to-t from-background/95 via-background/50 to-transparent" />
-                            <div className="absolute top-4 right-4 rounded-full bg-primary/90 p-3 backdrop-blur">
-                              <ProductIcon className="h-6 w-6 text-white" />
-                            </div>
+                  const iconMap: Record<string, any> = {
+                    'Silicomanganese': Factory,
+                    'Calcined Gypsum': Sparkles,
+                    'Kaolin': Beaker,
+                    'Silica Sand': Factory,
+                    'Raw Gypsum': Sparkles,
+                    'Iron Oxide': Flame,
+                    'Fine Manganese': Factory,
+                  };
+                  const ProductIcon = iconMap[product.name] || Factory;
+                  const defaultImages = [heroSlideOne, heroSlideTwo, heroSlideThree, mnHome, mnPortfolio14, mnPortfolio16];
+                  // Use product.image if it exists and is not empty, otherwise use default
+                  const productImage = (product.image && product.image.trim() !== '')
+                    ? product.image
+                    : defaultImages[product.id % defaultImages.length];
+
+                  return (
+                    <Link key={product.id} to={`/product/${product.id}`}>
+                      <Card className="group overflow-hidden border border-border shadow-lg transition-all hover:shadow-2xl hover:-translate-y-2 cursor-pointer">
+                        <div className="relative h-56 overflow-hidden">
+                          <img
+                            src={productImage.includes('data:image') ? productImage : `${productImage}${productImage.includes('?') ? '&' : '?'}_cb=${product.updated_at ? new Date(product.updated_at).getTime() : Date.now()}`}
+                            alt={language === 'ar' ? product.nameAr : product.name}
+                            className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
+                            loading="lazy"
+                            key={`${product.id}-${product.updated_at || Date.now()}`}
+                          />
+                          <div className="absolute inset-0 bg-gradient-to-t from-background/95 via-background/50 to-transparent" />
+                          <div className="absolute top-4 right-4 rounded-full bg-primary/90 p-3 backdrop-blur">
+                            <ProductIcon className="h-6 w-6 text-white" />
                           </div>
-                          <CardContent className="p-5">
-                            <h4 className="text-lg font-semibold mb-2">{language === 'ar' ? product.nameAr : product.name}</h4>
-                            <p className="text-sm text-muted-foreground leading-relaxed line-clamp-3">
-                              {language === 'ar' ? product.descriptionAr : product.description}
-                            </p>
-                          </CardContent>
-                        </Card>
-                      </Link>
-                    );
-                  })}
+                        </div>
+                        <CardContent className="p-5">
+                          <h4 className="text-lg font-semibold mb-2">{language === 'ar' ? product.nameAr : product.name}</h4>
+                          <p className="text-sm text-muted-foreground leading-relaxed line-clamp-3">
+                            {language === 'ar' ? product.descriptionAr : product.description}
+                          </p>
+                        </CardContent>
+                      </Card>
+                    </Link>
+                  );
+                })}
               </div>
             )}
             {miningProductsList.length > 0 && (
@@ -705,12 +705,12 @@ const Home = () => {
               {usePageContent('home', 'clientsSectionTitle', language === 'ar' ? 'شركاؤنا في النجاح' : 'Our Success Partners')}
             </h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              {usePageContent('home', 'clientsSectionDescription', language === 'ar' 
+              {usePageContent('home', 'clientsSectionDescription', language === 'ar'
                 ? 'نفتخر بشراكاتنا مع الشركات الرائدة في الصناعة'
                 : 'We are proud of our partnerships with industry-leading companies')}
             </p>
           </div>
-          
+
           {/* Clients Carousel */}
           {clientLogos.length > 0 ? (
             <div className="relative overflow-hidden">

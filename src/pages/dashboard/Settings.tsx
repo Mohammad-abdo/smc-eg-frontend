@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Save, Globe, Mail, Phone, MapPin, Image as ImageIcon, Plus, X, Upload } from 'lucide-react';
+import { Save, Globe, Mail, Phone, MapPin, Image as ImageIcon, Plus, X, Upload, Printer } from 'lucide-react';
 import { toast } from 'sonner';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -27,6 +27,9 @@ const Settings = () => {
     twitter: '',
     linkedin: '',
     clientLogos: [] as string[], // Array of base64 images
+    phoneNumbersSales: [] as Array<{ number: string; type: 'phone' | 'fax'; label?: string }>,
+    phoneNumbersAdmin: [] as Array<{ number: string; type: 'phone' | 'fax'; label?: string }>,
+    faxNumbers: [] as Array<{ number: string; type: 'phone' | 'fax'; label?: string }>,
   });
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -34,27 +37,123 @@ const Settings = () => {
     // Check if we're in browser environment
     if (typeof window === 'undefined') return;
     
-    // Load saved settings
-    try {
-      const saved = localStorage.getItem('siteSettings');
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        setSettings(prev => ({ ...prev, ...parsed, clientLogos: parsed.clientLogos || [] }));
+    // Load settings from backend
+    const loadSettings = async () => {
+      try {
+        const { settingsAPI } = await import('@/services/api');
+        const allSettings = await settingsAPI.getAll();
+        
+        // Convert settings array to object
+        const settingsObj: any = {};
+        allSettings.forEach((setting: any) => {
+          settingsObj[setting.key] = setting;
+        });
+
+        // Parse phone numbers
+        const parsePhoneNumbers = (key: string): any[] => {
+          const setting = settingsObj[key];
+          if (!setting) return [];
+          const value = setting.valueEn || setting.valueAr;
+          if (!value) return [];
+          try {
+            return JSON.parse(value);
+          } catch {
+            return [];
+          }
+        };
+
+        const loadedSettings = {
+          siteName: settingsObj.company_name?.valueEn || 'Sinai Manganese Co.',
+          siteNameAr: settingsObj.company_name?.valueAr || 'شركة سيناء للمنجنيز',
+          email: settingsObj.company_email?.valueEn || 'info@smc-eg.com',
+          phone: settingsObj.company_phone?.valueEn || '25740005 / 25740217',
+          address: settingsObj.company_address?.valueEn || 'Abu Zenima – South Sinai, Egypt',
+          addressAr: settingsObj.company_address?.valueAr || 'أبو زنيمة – جنوب سيناء، مصر',
+          cairoAddress: settingsObj.company_address_cairo?.valueEn || '1 Kasr El-Nile St., Cairo – Egypt',
+          cairoAddressAr: settingsObj.company_address_cairo?.valueAr || '1 شارع قصر النيل، القاهرة – مصر',
+          description: settingsObj.company_description?.valueEn || 'Sinai Manganese Co. is the first and largest manganese ore producer in Egypt.',
+          descriptionAr: settingsObj.company_description?.valueAr || 'شركة سيناء للمنجنيز هي أول وأكبر منتج لخام المنجنيز في مصر.',
+          facebook: settingsObj.facebook_url?.valueEn || 'https://www.facebook.com/share/p/1QWB8WE7ZS/',
+          twitter: settingsObj.twitter_url?.valueEn || '',
+          linkedin: settingsObj.linkedin_url?.valueEn || '',
+          phoneNumbersSales: parsePhoneNumbers('phone_numbers_sales'),
+          phoneNumbersAdmin: parsePhoneNumbers('phone_numbers_admin'),
+          faxNumbers: parsePhoneNumbers('fax_numbers'),
+          clientLogos: [] as string[],
+        };
+
+        setSettings(prev => ({ ...prev, ...loadedSettings }));
+        localStorage.setItem('siteSettings', JSON.stringify(loadedSettings));
+      } catch (error) {
+        console.error('Error loading settings from backend:', error);
+        // Fallback to localStorage
+        try {
+          const saved = localStorage.getItem('siteSettings');
+          if (saved) {
+            const parsed = JSON.parse(saved);
+            setSettings(prev => ({ ...prev, ...parsed, clientLogos: parsed.clientLogos || [] }));
+          }
+        } catch (e) {
+          console.error('Error loading settings from localStorage:', e);
+        }
       }
-    } catch (error) {
-      console.error('Error loading settings:', error);
-    }
+    };
+
+    loadSettings();
   }, []);
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (typeof window === 'undefined') return;
     
-    localStorage.setItem('siteSettings', JSON.stringify(settings));
-    // Trigger storage event to update all components
-    window.dispatchEvent(new Event('storage'));
-    // Trigger custom event for settings update
-    window.dispatchEvent(new CustomEvent('settingsUpdated'));
-    toast.success(isRTL ? 'تم حفظ الإعدادات بنجاح' : 'Settings saved successfully');
+    try {
+      // Save to backend
+      const { settingsAPI } = await import('@/services/api');
+      
+      // Save all settings
+      const settingsToSave = [
+        { key: 'company_name', valueEn: settings.siteName, valueAr: settings.siteNameAr },
+        { key: 'company_email', valueEn: settings.email, valueAr: settings.email },
+        { key: 'company_phone', valueEn: settings.phone, valueAr: settings.phone },
+        { key: 'company_address', valueEn: settings.address, valueAr: settings.addressAr },
+        { key: 'company_address_cairo', valueEn: settings.cairoAddress, valueAr: settings.cairoAddressAr },
+        { key: 'facebook_url', valueEn: settings.facebook, valueAr: settings.facebook },
+        { key: 'twitter_url', valueEn: settings.twitter, valueAr: settings.twitter },
+        { key: 'linkedin_url', valueEn: settings.linkedin, valueAr: settings.linkedin },
+        { 
+          key: 'phone_numbers_sales', 
+          valueEn: JSON.stringify(settings.phoneNumbersSales), 
+          valueAr: JSON.stringify(settings.phoneNumbersSales) 
+        },
+        { 
+          key: 'phone_numbers_admin', 
+          valueEn: JSON.stringify(settings.phoneNumbersAdmin), 
+          valueAr: JSON.stringify(settings.phoneNumbersAdmin) 
+        },
+        { 
+          key: 'fax_numbers', 
+          valueEn: JSON.stringify(settings.faxNumbers), 
+          valueAr: JSON.stringify(settings.faxNumbers) 
+        },
+      ];
+
+      // Save each setting
+      await Promise.all(settingsToSave.map(setting => 
+        settingsAPI.createOrUpdate(setting.key, setting.valueEn, setting.valueAr)
+      ));
+
+      // Also save to localStorage for offline access
+      localStorage.setItem('siteSettings', JSON.stringify(settings));
+      
+      // Trigger storage event to update all components
+      window.dispatchEvent(new Event('storage'));
+      // Trigger custom event for settings update
+      window.dispatchEvent(new CustomEvent('settingsUpdated'));
+      
+      toast.success(isRTL ? 'تم حفظ الإعدادات بنجاح' : 'Settings saved successfully');
+    } catch (error) {
+      console.error('Error saving settings:', error);
+      toast.error(isRTL ? 'فشل في حفظ الإعدادات' : 'Failed to save settings');
+    }
   };
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -179,13 +278,166 @@ const Settings = () => {
               <div className="space-y-2">
                 <Label className="text-white">
                   <Phone className="h-4 w-4 inline mr-2" />
-                  {t('phone') || 'Phone'}
+                  {t('phone') || 'Phone'} ({isRTL ? 'عرض عام' : 'General Display'})
                 </Label>
                 <Input
                   value={settings.phone}
                   onChange={(e) => setSettings({ ...settings, phone: e.target.value })}
                   className="bg-white/10 border-white/20 text-white"
+                  placeholder={isRTL ? '25740005 / 25740217' : '25740005 / 25740217'}
                 />
+                <p className="text-xs text-white/50">{isRTL ? 'يستخدم للعرض العام فقط' : 'Used for general display only'}</p>
+              </div>
+              
+              {/* Sales Phone Numbers */}
+              <div className="space-y-3 pt-4 border-t border-white/10">
+                <div className="flex items-center justify-between">
+                  <Label className="text-white text-base font-semibold">
+                    <Phone className="h-4 w-4 inline mr-2" />
+                    {isRTL ? 'أرقام المبيعات' : 'Sales Phone Numbers'}
+                  </Label>
+                  <Button
+                    type="button"
+                    size="sm"
+                    onClick={() => setSettings({
+                      ...settings,
+                      phoneNumbersSales: [...settings.phoneNumbersSales, { number: '', type: 'phone' }]
+                    })}
+                    className="bg-[#204393] hover:bg-[#1b356f] text-white"
+                  >
+                    <Plus className="h-4 w-4 mr-1" />
+                    {isRTL ? 'إضافة' : 'Add'}
+                  </Button>
+                </div>
+                {settings.phoneNumbersSales.map((phone, index) => (
+                  <div key={index} className="flex gap-2 items-center">
+                    <Input
+                      value={phone.number}
+                      onChange={(e) => {
+                        const updated = [...settings.phoneNumbersSales];
+                        updated[index] = { ...updated[index], number: e.target.value };
+                        setSettings({ ...settings, phoneNumbersSales: updated });
+                      }}
+                      placeholder={isRTL ? 'رقم الهاتف' : 'Phone number'}
+                      className="bg-white/10 border-white/20 text-white flex-1"
+                    />
+                    <Button
+                      type="button"
+                      variant="destructive"
+                      size="sm"
+                      onClick={() => setSettings({
+                        ...settings,
+                        phoneNumbersSales: settings.phoneNumbersSales.filter((_, i) => i !== index)
+                      })}
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ))}
+              </div>
+
+              {/* Administration Phone Numbers */}
+              <div className="space-y-3 pt-4 border-t border-white/10">
+                <div className="flex items-center justify-between">
+                  <Label className="text-white text-base font-semibold">
+                    <Phone className="h-4 w-4 inline mr-2" />
+                    {isRTL ? 'أرقام الإدارة' : 'Administration Phone Numbers'}
+                  </Label>
+                  <Button
+                    type="button"
+                    size="sm"
+                    onClick={() => setSettings({
+                      ...settings,
+                      phoneNumbersAdmin: [...settings.phoneNumbersAdmin, { number: '', type: 'phone' }]
+                    })}
+                    className="bg-[#204393] hover:bg-[#1b356f] text-white"
+                  >
+                    <Plus className="h-4 w-4 mr-1" />
+                    {isRTL ? 'إضافة' : 'Add'}
+                  </Button>
+                </div>
+                {settings.phoneNumbersAdmin.map((phone, index) => (
+                  <div key={index} className="flex gap-2 items-center">
+                    <Input
+                      value={phone.number}
+                      onChange={(e) => {
+                        const updated = [...settings.phoneNumbersAdmin];
+                        updated[index] = { ...updated[index], number: e.target.value };
+                        setSettings({ ...settings, phoneNumbersAdmin: updated });
+                      }}
+                      placeholder={isRTL ? 'رقم الهاتف' : 'Phone number'}
+                      className="bg-white/10 border-white/20 text-white flex-1"
+                    />
+                    <Button
+                      type="button"
+                      variant="destructive"
+                      size="sm"
+                      onClick={() => setSettings({
+                        ...settings,
+                        phoneNumbersAdmin: settings.phoneNumbersAdmin.filter((_, i) => i !== index)
+                      })}
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ))}
+              </div>
+
+              {/* Fax Numbers */}
+              <div className="space-y-3 pt-4 border-t border-white/10">
+                <div className="flex items-center justify-between">
+                  <Label className="text-white text-base font-semibold">
+                    <Printer className="h-4 w-4 inline mr-2" />
+                    {isRTL ? 'أرقام الفاكس' : 'Fax Numbers'}
+                  </Label>
+                  <Button
+                    type="button"
+                    size="sm"
+                    onClick={() => setSettings({
+                      ...settings,
+                      faxNumbers: [...settings.faxNumbers, { number: '', type: 'fax', label: '' }]
+                    })}
+                    className="bg-[#204393] hover:bg-[#1b356f] text-white"
+                  >
+                    <Plus className="h-4 w-4 mr-1" />
+                    {isRTL ? 'إضافة' : 'Add'}
+                  </Button>
+                </div>
+                {settings.faxNumbers.map((fax, index) => (
+                  <div key={index} className="flex gap-2 items-center">
+                    <Input
+                      value={fax.number}
+                      onChange={(e) => {
+                        const updated = [...settings.faxNumbers];
+                        updated[index] = { ...updated[index], number: e.target.value };
+                        setSettings({ ...settings, faxNumbers: updated });
+                      }}
+                      placeholder={isRTL ? 'رقم الفاكس' : 'Fax number'}
+                      className="bg-white/10 border-white/20 text-white flex-1"
+                    />
+                    <Input
+                      value={fax.label || ''}
+                      onChange={(e) => {
+                        const updated = [...settings.faxNumbers];
+                        updated[index] = { ...updated[index], label: e.target.value };
+                        setSettings({ ...settings, faxNumbers: updated });
+                      }}
+                      placeholder={isRTL ? 'التسمية (اختياري)' : 'Label (optional)'}
+                      className="bg-white/10 border-white/20 text-white w-32"
+                    />
+                    <Button
+                      type="button"
+                      variant="destructive"
+                      size="sm"
+                      onClick={() => setSettings({
+                        ...settings,
+                        faxNumbers: settings.faxNumbers.filter((_, i) => i !== index)
+                      })}
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ))}
               </div>
               <div className="grid gap-4 md:grid-cols-2">
                 <div className="space-y-2">

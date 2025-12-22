@@ -1,23 +1,33 @@
 import { useState } from 'react';
-import { MapPin, Phone, Mail, Clock, Building, Send } from 'lucide-react';
+import { MapPin, Mail, Clock, Building, Send } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent } from '@/components/ui/card';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useSettings } from '@/hooks/usePageContent';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import heroSlideOne from '@/assets/manganese/one.jpeg';
 import mnFacility from '@/assets/manganese/portfolio14.jpg';
+import PhoneNumbers from '@/components/PhoneNumbers';
 
 const Contact = () => {
   const { t, isRTL, language } = useLanguage();
+  const settings = useSettings();
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     phone: '',
     message: '',
   });
+  
+  // Combine all phone numbers for display
+  const allPhones = [
+    ...(settings.phoneNumbersSales || []),
+    ...(settings.phoneNumbersAdmin || []),
+    ...(settings.faxNumbers || []),
+  ];
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -32,13 +42,23 @@ const Contact = () => {
   };
 
   const contactInfo = [
-    { icon: MapPin, label: t('contactHeadOfficeLabel'), value: t('contactHeadOfficeValue') },
-    { icon: Phone, label: t('contactPhoneLabel'), value: t('contactPhoneValue') },
-    { icon: Mail, label: t('contactEmailLabel'), value: 'info@smc-eg.com' },
+    { 
+      icon: MapPin, 
+      label: t('contactHeadOfficeLabel'), 
+      value: settings.address || t('contactHeadOfficeValue'),
+      isPhoneSection: false
+    },
+    { 
+      icon: Mail, 
+      label: t('contactEmailLabel'), 
+      value: settings.email || 'info@smc-eg.com',
+      isPhoneSection: false
+    },
     { 
       icon: Clock, 
       label: language === 'ar' ? 'ساعات العمل' : 'Working Hours', 
-      value: language === 'ar' ? 'الأحد - الخميس · 8:00 صباحاً - 5:00 مساءً' : 'Sun - Thu · 8:00 AM - 5:00 PM' 
+      value: language === 'ar' ? 'الأحد - الخميس · 8:00 صباحاً - 5:00 مساءً' : 'Sun - Thu · 8:00 AM - 5:00 PM',
+      isPhoneSection: false
     },
   ];
 
@@ -74,13 +94,26 @@ const Contact = () => {
                   key={idx}
                   className={cn('flex gap-4 rounded-2xl border border-white/20 bg-white/5 p-4', isRTL && 'flex-row-reverse text-right')}
                 >
-                  <item.icon className="h-5 w-5 text-white" />
-                  <div>
-                    <p className="text-xs uppercase tracking-[0.4em] text-white/60">{item.label}</p>
+                  <item.icon className="h-5 w-5 text-white flex-shrink-0" />
+                  <div className="flex-1">
+                    <p className="text-xs uppercase tracking-[0.4em] text-white/60 mb-1">{item.label}</p>
                     <p className="text-base">{item.value}</p>
                   </div>
                 </div>
               ))}
+              {allPhones.length > 0 && (
+                <div className={cn('rounded-2xl border border-white/20 bg-white/5 p-4', isRTL && 'text-right')}>
+                  <p className="text-xs uppercase tracking-[0.4em] text-white/60 mb-3">
+                    {language === 'ar' ? 'أرقام الهاتف والفاكس' : 'Phone & Fax Numbers'}
+                  </p>
+                  <PhoneNumbers 
+                    phones={allPhones} 
+                    className="space-y-2"
+                    textClassName="text-white/80"
+                    showLabels={true}
+                  />
+                </div>
+              )}
             </div>
           </div>
         </div>

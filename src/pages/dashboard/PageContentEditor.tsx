@@ -128,12 +128,47 @@ const PageContentEditor = () => {
   const [newKeyName, setNewKeyName] = useState('');
 
   useEffect(() => {
-    // Load saved content
-    if (typeof window === 'undefined') return;
-    
-    const saved = localStorage.getItem('pageContent');
-    if (saved) {
-      setContent(JSON.parse(saved));
+    // Load content from backend
+    const loadContent = async () => {
+      try {
+        const { pageContentAPI } = await import('@/services/api');
+        const allContent = await pageContentAPI.getAll();
+        
+        // Convert array to object structure
+        const contentObj: PageContent = {};
+        allContent.forEach((item) => {
+          if (!contentObj[item.page]) {
+            contentObj[item.page] = { en: {}, ar: {} };
+          }
+          if (item.valueEn !== null) {
+            contentObj[item.page].en[item.key] = item.valueEn;
+          }
+          if (item.valueAr !== null) {
+            contentObj[item.page].ar[item.key] = item.valueAr;
+          }
+        });
+        
+        // Merge with defaults
+        setContent({ ...content, ...contentObj });
+        
+        // Also save to localStorage for offline access
+        localStorage.setItem('pageContent', JSON.stringify(contentObj));
+      } catch (error) {
+        console.error('Error loading page content from backend:', error);
+        // Fallback to localStorage
+        try {
+          const saved = localStorage.getItem('pageContent');
+          if (saved) {
+            setContent(JSON.parse(saved));
+          }
+        } catch (e) {
+          console.error('Error loading from localStorage:', e);
+        }
+      }
+    };
+
+    if (typeof window !== 'undefined') {
+      loadContent();
     }
   }, []);
 
@@ -146,13 +181,51 @@ const PageContentEditor = () => {
     { value: 'news', label: 'News Page' },
   ];
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (typeof window === 'undefined') return;
     
-    localStorage.setItem('pageContent', JSON.stringify(content));
-    // Trigger storage event to update all components
-    window.dispatchEvent(new Event('storage'));
-    toast.success('Content saved successfully');
+    try {
+      const { pageContentAPI } = await import('@/services/api');
+      
+      // Convert content object to array format for bulk update
+      const contentArray: Array<{ page: string; key: string; valueEn: string | null; valueAr: string | null }> = [];
+      
+      Object.entries(content).forEach(([page, pageData]) => {
+        Object.entries(pageData.en || {}).forEach(([key, value]) => {
+          contentArray.push({
+            page,
+            key,
+            valueEn: value || null,
+            valueAr: pageData.ar?.[key] || null,
+          });
+        });
+        // Also include Arabic-only keys
+        Object.entries(pageData.ar || {}).forEach(([key, value]) => {
+          if (!pageData.en?.[key]) {
+            contentArray.push({
+              page,
+              key,
+              valueEn: null,
+              valueAr: value || null,
+            });
+          }
+        });
+      });
+      
+      await pageContentAPI.bulkUpdate(contentArray);
+      
+      // Also save to localStorage for offline access
+      localStorage.setItem('pageContent', JSON.stringify(content));
+      
+      // Trigger storage event to update all components
+      window.dispatchEvent(new Event('storage'));
+      window.dispatchEvent(new CustomEvent('pageContentUpdated'));
+      
+      toast.success(isRTL ? 'تم حفظ المحتوى بنجاح' : 'Content saved successfully');
+    } catch (error: any) {
+      console.error('Error saving page content:', error);
+      toast.error(isRTL ? 'فشل في حفظ المحتوى' : 'Failed to save content');
+    }
   };
 
   const handleAddField = (page: string, lang: string) => {

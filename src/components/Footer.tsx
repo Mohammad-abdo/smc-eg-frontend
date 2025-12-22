@@ -1,18 +1,24 @@
 import { Link } from 'react-router-dom';
-import { Facebook, Linkedin, Phone, Mail } from 'lucide-react';
+import { Facebook, Linkedin, Mail } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useSettings, usePageContent } from '@/hooks/usePageContent';
 import { cn } from '@/lib/utils';
 import smcLogo from '@/assets/manganese/logo.png';
 import whatsappIcon from '@/assets/manganese/icons8-whatsapp-logo-64.png';
+import PhoneNumbers, { PhoneNumber } from '@/components/PhoneNumbers';
 
 const Footer = () => {
-  const { t, isRTL } = useLanguage();
+  const { t, isRTL, language } = useLanguage();
   const currentYear = new Date().getFullYear();
   const settings = useSettings();
   const footerDescription = usePageContent('footer', 'description', t('footerDescription'));
   const quickLinks = usePageContent('footer', 'quickLinks', t('quickLinks'));
   const followUs = usePageContent('footer', 'followUs', t('followUs'));
+  
+  // Get phone numbers from settings
+  const salesPhones: PhoneNumber[] = settings.phoneNumbersSales || [];
+  const adminPhones: PhoneNumber[] = settings.phoneNumbersAdmin || [];
+  const faxNumbers: PhoneNumber[] = settings.faxNumbers || [];
 
   const footerNavigation = [
     { name: t('home'), href: '/' },
@@ -31,65 +37,43 @@ const Footer = () => {
           <div className={cn('grid gap-10 lg:grid-cols-4', isRTL && 'text-right')}>
             {/* Column 1: Phone Numbers */}
             <div>
-              <h3 className="mb-4 text-xs font-semibold uppercase tracking-[0.4em] text-white/90">
-                {isRTL ? 'أرقام المبيعات' : 'Sales Numbers'}
-              </h3>
-              <div className="space-y-3 mb-6">
-                <a 
-                  href="tel:25200705020" 
-                  className={cn('flex items-center gap-3 text-white/70 hover:text-white transition', isRTL && 'flex-row-reverse')}
-                >
-                  <Phone className="h-5 w-5 text-primary flex-shrink-0" />
-                  <span>25200705020</span>
-                </a>
-                <a 
-                  href="tel:25222155555"
-                  className={cn('flex items-center gap-3 text-white/70 hover:text-white transition', isRTL && 'flex-row-reverse')}
-                >
-                  <Phone className="h-5 w-5 text-primary flex-shrink-0" />
-                  <span>25222155555</span>
-                </a>
-                <a 
-                  href="tel:25555211210"
-                  className={cn('flex items-center gap-3 text-white/70 hover:text-white transition', isRTL && 'flex-row-reverse')}
-                >
-                  <Phone className="h-5 w-5 text-primary flex-shrink-0" />
-                  <span>25555211210</span>
-                </a>
-              </div>
-              <h3 className="mb-4 text-xs font-semibold uppercase tracking-[0.4em] text-white/90">
-                {isRTL ? 'أرقام الإدارة' : 'Administration Numbers'}
-              </h3>
-              <div className="space-y-3">
-                <a 
-                  href="tel:51702505" 
-                  className={cn('flex items-center gap-3 text-white/70 hover:text-white transition', isRTL && 'flex-row-reverse')}
-                >
-                  <Phone className="h-5 w-5 text-primary flex-shrink-0" />
-                  <span>51702505</span>
-                </a>
-                <a 
-                  href="tel:51702557"
-                  className={cn('flex items-center gap-3 text-white/70 hover:text-white transition', isRTL && 'flex-row-reverse')}
-                >
-                  <Phone className="h-5 w-5 text-primary flex-shrink-0" />
-                  <span>51702557</span>
-                </a>
-                <a 
-                  href="tel:51705202"
-                  className={cn('flex items-center gap-3 text-white/70 hover:text-white transition', isRTL && 'flex-row-reverse')}
-                >
-                  <Phone className="h-5 w-5 text-primary flex-shrink-0" />
-                  <span>51705202</span>
-                </a>
-              </div>
+              {salesPhones.length > 0 && (
+                <>
+                  <h3 className="mb-4 text-xs font-semibold uppercase tracking-[0.4em] text-white/90">
+                    {isRTL ? 'أرقام المبيعات' : 'Sales Numbers'}
+                  </h3>
+                  <div className="mb-6">
+                    <PhoneNumbers phones={salesPhones} />
+                  </div>
+                </>
+              )}
+              {adminPhones.length > 0 && (
+                <>
+                  <h3 className="mb-4 text-xs font-semibold uppercase tracking-[0.4em] text-white/90">
+                    {isRTL ? 'أرقام الإدارة' : 'Administration Numbers'}
+                  </h3>
+                  <div className="mb-6">
+                    <PhoneNumbers phones={adminPhones} />
+                  </div>
+                </>
+              )}
+              {faxNumbers.length > 0 && (
+                <>
+                  <h3 className="mb-4 text-xs font-semibold uppercase tracking-[0.4em] text-white/90">
+                    {isRTL ? 'أرقام الفاكس' : 'Fax Numbers'}
+                  </h3>
+                  <div className="mb-6">
+                    <PhoneNumbers phones={faxNumbers} showLabels />
+                  </div>
+                </>
+              )}
               <div className="mt-6 pt-6 border-t border-white/10">
                 <a 
-                  href="mailto:info1@smc-eg.com" 
+                  href={`mailto:${settings.email}`} 
                   className={cn('flex items-center gap-3 text-white/70 hover:text-white transition', isRTL && 'flex-row-reverse')}
                 >
                   <Mail className="h-5 w-5 text-primary flex-shrink-0" />
-                  <span className="text-sm">info1@smc-eg.com</span>
+                  <span className="text-sm">{settings.email}</span>
                   <span className="text-xs text-white/50">({isRTL ? 'للشكاوى' : 'For Complaints'})</span>
                 </a>
               </div>
