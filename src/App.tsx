@@ -2,8 +2,8 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
-import { LanguageProvider } from "./contexts/LanguageContext";
+import { BrowserRouter, Routes, Route, useLocation, useParams, Navigate } from "react-router-dom";
+import { LanguageProvider, useLanguage } from "./contexts/LanguageContext";
 import AppLayout from "./components/AppLayout";
 import Home from "./pages/Home";
 import About from "./pages/About";
@@ -42,6 +42,7 @@ import Login from "./pages/Login";
 import ProtectedRoute from "./components/ProtectedRoute";
 import NotFound from "./pages/NotFound";
 import LiveChatWidget from "./components/LiveChatWidget";
+import React from "react";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -72,76 +73,98 @@ if (typeof window !== 'undefined') {
   }
 }
 
+// Redirect root to default language
+const RootRedirect = () => {
+  const { language } = useLanguage();
+  return <Navigate to={`/${language}/`} replace />;
+};
+
+// Redirect /:lang to /:lang/
+const LangRedirect = () => {
+  const params = useParams<{ lang?: string }>();
+  const lang = params.lang || 'en';
+  return <Navigate to={`/${lang}/`} replace />;
+};
+
 const AppRoutes = () => {
   const location = useLocation();
 
   return (
     <div key={location.pathname} className="page-transition">
-      <Routes location={location}>
-                <Route path="/" element={<Home />} />
-                <Route path="/about" element={<About />} />
-                <Route path="/products" element={<ProductsMain />} />
-                <Route path="/products/:categorySlug" element={<CategoryProducts />} />
-                <Route path="/category/:categorySlug" element={<CategoryProducts />} />
-                <Route path="/industrial-products" element={<Products type="industrial" />} />
-                <Route path="/mining-products" element={<Products type="mining" />} />
-                <Route path="/private-port" element={<PrivatePort />} />
-                <Route path="/financial" element={<Financial />} />
-                <Route path="/tenders" element={<Tenders />} />
-                <Route path="/members" element={<Members />} />
-                <Route path="/news" element={<News />} />
-        <Route path="/news/:postId" element={<PostDetail />} />
-                <Route path="/contact" element={<Contact />} />
-        <Route path="/complaints" element={<Complaints />} />
-        <Route path="/product/:productId" element={<ProductDetail />} />
-        <Route path="/login" element={<Login />} />
-        <Route 
-          path="/dashboard" 
-          element={
-            <ProtectedRoute>
-              <Dashboard />
-            </ProtectedRoute>
-          }
-        >
-          <Route index element={<DashboardHome />} />
-          <Route path="home" element={<DashboardHome />} />
-          <Route path="statistics" element={<Statistics />} />
-          <Route path="financial" element={<FinancialManagement />} />
-          <Route path="products" element={<ProductsManagement />} />
-          <Route path="categories" element={<CategoriesManagement />} />
-          <Route path="news" element={<NewsManagement />} />
-          <Route path="pages" element={<PageContentEditor />} />
-          <Route path="banners" element={<HeroBanners />} />
-          <Route path="media" element={<MediaLibrary />} />
-          <Route path="contacts" element={<ContactsManagement />} />
-          <Route path="complaints" element={<ComplaintsManagement />} />
-          <Route path="chat" element={<ChatManagement />} />
-          <Route path="tenders" element={<TendersManagement />} />
-          <Route path="members" element={<MembersManagement />} />
-          <Route path="clients" element={<ClientsManagement />} />
-          <Route path="seo" element={<SEOSettings />} />
-          <Route path="users" element={<UsersManagement />} />
-          <Route path="settings" element={<Settings />} />
-        </Route>
-                <Route path="*" element={<NotFound />} />
-              </Routes>
-          </div>
+        <Routes location={location}>
+          {/* Root redirect */}
+          <Route path="/" element={<RootRedirect />} />
+          
+          {/* Language-prefixed routes */}
+          <Route path="/:lang" element={<LangRedirect />} />
+          <Route path="/:lang/" element={<Home />} />
+          <Route path="/:lang/about" element={<About />} />
+          <Route path="/:lang/products" element={<ProductsMain />} />
+          <Route path="/:lang/products/:categorySlug" element={<CategoryProducts />} />
+          <Route path="/:lang/category/:categorySlug" element={<CategoryProducts />} />
+          <Route path="/:lang/industrial-products" element={<Products type="industrial" />} />
+          <Route path="/:lang/mining-products" element={<Products type="mining" />} />
+          <Route path="/:lang/private-port" element={<PrivatePort />} />
+          <Route path="/:lang/financial" element={<Financial />} />
+          <Route path="/:lang/tenders" element={<Tenders />} />
+          <Route path="/:lang/members" element={<Members />} />
+          <Route path="/:lang/news" element={<News />} />
+          <Route path="/:lang/news/:postId" element={<PostDetail />} />
+          <Route path="/:lang/contact" element={<Contact />} />
+          <Route path="/:lang/complaints" element={<Complaints />} />
+          <Route path="/:lang/product/:productId" element={<ProductDetail />} />
+          
+          {/* Dashboard routes (no language prefix) */}
+          <Route path="/login" element={<Login />} />
+          <Route 
+            path="/dashboard" 
+            element={
+              <ProtectedRoute>
+                <Dashboard />
+              </ProtectedRoute>
+            }
+          >
+            <Route index element={<DashboardHome />} />
+            <Route path="home" element={<DashboardHome />} />
+            <Route path="statistics" element={<Statistics />} />
+            <Route path="financial" element={<FinancialManagement />} />
+            <Route path="products" element={<ProductsManagement />} />
+            <Route path="categories" element={<CategoriesManagement />} />
+            <Route path="news" element={<NewsManagement />} />
+            <Route path="pages" element={<PageContentEditor />} />
+            <Route path="banners" element={<HeroBanners />} />
+            <Route path="media" element={<MediaLibrary />} />
+            <Route path="contacts" element={<ContactsManagement />} />
+            <Route path="complaints" element={<ComplaintsManagement />} />
+            <Route path="chat" element={<ChatManagement />} />
+            <Route path="tenders" element={<TendersManagement />} />
+            <Route path="members" element={<MembersManagement />} />
+            <Route path="clients" element={<ClientsManagement />} />
+            <Route path="seo" element={<SEOSettings />} />
+            <Route path="users" element={<UsersManagement />} />
+            <Route path="settings" element={<Settings />} />
+          </Route>
+          
+          {/* 404 */}
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </div>
   );
 };
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <LanguageProvider>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
+    <TooltipProvider>
+      <Toaster />
+      <Sonner />
+      <BrowserRouter>
+        <LanguageProvider>
           <AppLayout>
             <AppRoutes />
           </AppLayout>
-        </BrowserRouter>
-      </TooltipProvider>
-    </LanguageProvider>
+        </LanguageProvider>
+      </BrowserRouter>
+    </TooltipProvider>
   </QueryClientProvider>
 );
 

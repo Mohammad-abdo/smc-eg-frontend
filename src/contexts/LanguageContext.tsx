@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 
 type Language = 'en' | 'ar';
 
@@ -645,7 +646,61 @@ const translations = {
 };
 
 export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [language, setLanguage] = useState<Language>('en');
+  const location = useLocation();
+  const navigate = useNavigate();
+  const params = useParams<{ lang?: string }>();
+  
+  // Get language from URL or default to 'en'
+  const getLanguageFromUrl = (): Language => {
+    const langFromUrl = params.lang || location.pathname.split('/')[1];
+    return (langFromUrl === 'ar' || langFromUrl === 'en') ? langFromUrl : 'en';
+  };
+
+  const [language, setLanguage] = useState<Language>(getLanguageFromUrl());
+
+  // Sync language with URL changes
+  useEffect(() => {
+    const urlLang = getLanguageFromUrl();
+    if (urlLang !== language) {
+      setLanguage(urlLang);
+    }
+  }, [location.pathname, params.lang]);
+
+  // Update language and URL
+  const handleSetLanguage = (lang: Language) => {
+    setLanguage(lang);
+    
+    // Update document direction
+    if (typeof document !== 'undefined') {
+      document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
+      document.documentElement.lang = lang;
+    }
+
+    // Update URL with new language prefix
+    const currentPath = location.pathname;
+    
+    // Skip URL update for dashboard and login routes
+    if (currentPath.startsWith('/dashboard') || currentPath.startsWith('/login')) {
+      return;
+    }
+
+    // Remove old language prefix if exists
+    let pathWithoutLang = currentPath;
+    if (currentPath.startsWith('/ar/') || currentPath.startsWith('/en/')) {
+      pathWithoutLang = currentPath.slice(4); // Remove '/ar/' or '/en/'
+    } else if (currentPath === '/ar' || currentPath === '/en') {
+      pathWithoutLang = '/';
+    } else if (currentPath === '/') {
+      pathWithoutLang = '/';
+    }
+
+    // Add new language prefix
+    const newPath = pathWithoutLang === '/' ? `/${lang}` : `/${lang}${pathWithoutLang}`;
+    
+    if (newPath !== currentPath) {
+      navigate(newPath, { replace: true });
+    }
+  };
 
   useEffect(() => {
     // Update document direction based on language
@@ -662,7 +717,7 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const isRTL = language === 'ar';
 
   return (
-    <LanguageContext.Provider value={{ language, setLanguage, t, isRTL }}>
+    <LanguageContext.Provider value={{ language, setLanguage: handleSetLanguage, t, isRTL }}>
       {children}
     </LanguageContext.Provider>
   );

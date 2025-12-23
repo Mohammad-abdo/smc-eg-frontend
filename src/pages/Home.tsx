@@ -31,6 +31,7 @@ import {
   type CarouselApi,
 } from '@/components/ui/carousel';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { getLocalizedLink } from '@/hooks/useLocalizedNavigate';
 import { cn } from '@/lib/utils';
 import { useProducts, useProductCategories } from '@/hooks/useApi';
 import { useBanners } from '@/hooks/useApi';
@@ -354,7 +355,7 @@ const Home = () => {
             </p>
             <div className={cn('flex flex-wrap gap-4', isRTL ? 'flex-row-reverse justify-end' : '')}>
               <Button asChild size="lg" className="bg-[#204393] text-white hover:bg-[#1b356f]">
-                <Link to="/contact">
+                <Link to={getLocalizedLink('/contact', language)}>
                   {t('heroPrimaryCta')}
                   <ArrowRight className={cn('ml-2 h-5 w-5', isRTL && 'rotate-180')} />
                 </Link>
@@ -365,7 +366,7 @@ const Home = () => {
                 variant="outline"
                 className="border-[#204393] text-[#204393] hover:bg-[#204393]/10"
               >
-                <Link to="/about">{t('heroSecondaryCta')}</Link>
+                <Link to={getLocalizedLink('/about', language)}>{t('heroSecondaryCta')}</Link>
               </Button>
             </div>
             <div className="grid gap-4 sm:grid-cols-2">
@@ -614,7 +615,7 @@ const Home = () => {
             {industrialProductsList.length > 0 && (
               <div className={cn('mt-8 text-center', isRTL && 'text-right')}>
                 <Button asChild variant="outline">
-                  <Link to="/products/industrial">
+                  <Link to={getLocalizedLink('/products/industrial', language)}>
                     {t('viewAllProducts')} - {industrialProducts}
                     <ArrowRight className={cn('ml-2 h-4 w-4', isRTL && 'rotate-180')} />
                   </Link>
@@ -683,7 +684,7 @@ const Home = () => {
             {miningProductsList.length > 0 && (
               <div className={cn('mt-8 text-center', isRTL && 'text-right')}>
                 <Button asChild variant="outline">
-                  <Link to="/products/mining">
+                  <Link to={getLocalizedLink('/products/mining', language)}>
                     {t('viewAllProducts')} - {miningProducts}
                     <ArrowRight className={cn('ml-2 h-4 w-4', isRTL && 'rotate-180')} />
                   </Link>

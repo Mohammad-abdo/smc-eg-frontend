@@ -9,6 +9,7 @@ import {
   DropdownMenuTrigger,
 } from './ui/dropdown-menu';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { getLocalizedLink } from '@/hooks/useLocalizedNavigate';
 import { cn } from '@/lib/utils';
 import smcLogo from '@/assets/manganese/logo.png';
 
@@ -25,22 +26,22 @@ const Header = () => {
   const { language, setLanguage, t, isRTL } = useLanguage();
 
   const aboutSubmenu = [
-    { name: language === 'ar' ? 'التعريف بالشركة' : 'Company Introduction', href: '/about' },
-    { name: language === 'ar' ? 'رؤية الشركة' : 'Company Vision', href: '/about#vision' },
-    { name: language === 'ar' ? 'الأعضاء' : 'Members', href: '/members' },
+    { name: language === 'ar' ? 'التعريف بالشركة' : 'Company Introduction', href: getLocalizedLink('/about', language) },
+    { name: language === 'ar' ? 'رؤية الشركة' : 'Company Vision', href: getLocalizedLink('/about#vision', language) },
+    { name: language === 'ar' ? 'الأعضاء' : 'Members', href: getLocalizedLink('/members', language) },
   ];
 
   const navigation: NavigationItem[] = [
-    { name: t('home'), href: '/' },
-    { name: t('about'), href: '/about', hasSubmenu: true, submenu: aboutSubmenu },
-    { name: t('industrialProducts'), href: '/products/industrial' },
-    { name: t('miningProducts'), href: '/products/mining' },
-    { name: t('privatePort'), href: '/private-port' },
-    { name: t('financial'), href: '/financial' },
-    { name: t('tenders'), href: '/tenders' },
-    { name: t('news'), href: '/news' },
-    { name: t('contact'), href: '/contact' },
-    { name: t('complaints'), href: '/complaints' },
+    { name: t('home'), href: getLocalizedLink('/', language) },
+    { name: t('about'), href: getLocalizedLink('/about', language), hasSubmenu: true, submenu: aboutSubmenu },
+    { name: t('industrialProducts'), href: getLocalizedLink('/products/industrial', language) },
+    { name: t('miningProducts'), href: getLocalizedLink('/products/mining', language) },
+    { name: t('privatePort'), href: getLocalizedLink('/private-port', language) },
+    { name: t('financial'), href: getLocalizedLink('/financial', language) },
+    { name: t('tenders'), href: getLocalizedLink('/tenders', language) },
+    { name: t('news'), href: getLocalizedLink('/news', language) },
+    { name: t('contact'), href: getLocalizedLink('/contact', language) },
+    { name: t('complaints'), href: getLocalizedLink('/complaints', language) },
   ];
 
   const toggleLanguage = () => {
@@ -90,7 +91,7 @@ const Header = () => {
           isRTL && "flex-row-reverse"
         )}>
           {/* Logo */}
-          <Link to="/" className="flex items-center gap-4">
+          <Link to={getLocalizedLink('/', language)} className="flex items-center gap-4">
             <img
               src={smcLogo}
               alt="Sinai Manganese Co. logo"
@@ -111,7 +112,9 @@ const Header = () => {
                     <DropdownMenuTrigger
                       className={cn(
                         "px-3 py-2 text-sm font-semibold rounded-md transition-colors whitespace-nowrap flex items-center gap-1",
-                        location.pathname === item.href || location.pathname.startsWith('/about') || location.pathname.startsWith('/members')
+                        location.pathname === item.href || 
+                        location.pathname.startsWith(`/${language}/about`) || 
+                        location.pathname.startsWith(`/${language}/members`)
                           ? "text-primary bg-accent"
                           : "text-foreground hover:text-primary hover:bg-accent/50"
                       )}
@@ -120,19 +123,24 @@ const Header = () => {
                       <ChevronDown className="h-4 w-4" />
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align={isRTL ? 'end' : 'start'}>
-                      {item.submenu.map((subItem) => (
-                        <DropdownMenuItem key={subItem.name} asChild>
-                          <Link
-                            to={subItem.href}
-                            className={cn(
-                              "cursor-pointer",
-                              location.pathname === subItem.href && "bg-accent"
-                            )}
-                          >
-                            {subItem.name}
-                          </Link>
-                        </DropdownMenuItem>
-                      ))}
+                      {item.submenu.map((subItem) => {
+                        const pathWithoutHash = subItem.href.split('#')[0];
+                        const isActive = location.pathname === pathWithoutHash || 
+                                       location.pathname.startsWith(pathWithoutHash);
+                        return (
+                          <DropdownMenuItem key={subItem.name} asChild>
+                            <Link
+                              to={subItem.href}
+                              className={cn(
+                                "cursor-pointer",
+                                isActive && "bg-accent"
+                              )}
+                            >
+                              {subItem.name}
+                            </Link>
+                          </DropdownMenuItem>
+                        );
+                      })}
                     </DropdownMenuContent>
                   </DropdownMenu>
                 );
@@ -143,7 +151,7 @@ const Header = () => {
                   to={item.href}
                   className={cn(
                     "px-3 py-2 text-sm font-semibold rounded-md transition-colors whitespace-nowrap",
-                    location.pathname === item.href
+                    location.pathname === item.href || location.pathname.startsWith(item.href + '/')
                       ? "text-primary bg-accent"
                       : "text-foreground hover:text-primary hover:bg-accent/50"
                   )}
@@ -179,7 +187,9 @@ const Header = () => {
                   <div key={item.name} className="space-y-1">
                     <div className={cn(
                       "px-4 py-2 text-sm font-semibold rounded-md",
-                      (location.pathname === item.href || location.pathname.startsWith('/about') || location.pathname.startsWith('/members'))
+                      (location.pathname === item.href || 
+                       location.pathname.startsWith(`/${language}/about`) || 
+                       location.pathname.startsWith(`/${language}/members`))
                         ? "text-primary bg-accent"
                         : "text-foreground",
                       isRTL && "text-right"
@@ -194,7 +204,8 @@ const Header = () => {
                           onClick={() => setMobileMenuOpen(false)}
                           className={cn(
                             "block px-4 py-2 text-sm font-medium rounded-md transition-colors",
-                            location.pathname === subItem.href
+                            location.pathname === subItem.href.split('#')[0] || 
+                            location.pathname.startsWith(subItem.href.split('#')[0] + '/')
                               ? "text-primary bg-accent"
                               : "text-foreground hover:text-primary hover:bg-accent/50",
                             isRTL && "text-right"
@@ -214,7 +225,7 @@ const Header = () => {
                   onClick={() => setMobileMenuOpen(false)}
                   className={cn(
                     "block px-4 py-2 text-sm font-semibold rounded-md transition-colors",
-                    location.pathname === item.href
+                    location.pathname === item.href || location.pathname.startsWith(item.href + '/')
                       ? "text-primary bg-accent"
                       : "text-foreground hover:text-primary hover:bg-accent/50",
                     isRTL && "text-right"

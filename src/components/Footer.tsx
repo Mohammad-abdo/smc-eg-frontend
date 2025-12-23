@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { Facebook, Linkedin, Mail } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { getLocalizedLink } from '@/hooks/useLocalizedNavigate';
 import { useSettings, usePageContent } from '@/hooks/usePageContent';
 import { cn } from '@/lib/utils';
 import smcLogo from '@/assets/manganese/logo.png';
@@ -23,10 +24,10 @@ const Footer = () => {
   const complaintsEmail = settings.complaintsEmail || settings.email || 'info1@smc-eg.com';
 
   const footerNavigation = [
-    { name: t('home'), href: '/' },
-    { name: t('about'), href: '/about' },
-    { name: t('products'), href: '/products' },
-    { name: t('news'), href: '/news' },
+    { name: t('home'), href: getLocalizedLink('/', language) },
+    { name: t('about'), href: getLocalizedLink('/about', language) },
+    { name: t('products'), href: getLocalizedLink('/products', language) },
+    { name: t('news'), href: getLocalizedLink('/news', language) },
   ];
 
   return (

@@ -3,6 +3,7 @@ import { Factory, Atom, Wrench, Sparkles, Beaker, Flame } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { getLocalizedLink } from '@/hooks/useLocalizedNavigate';
 import { cn } from '@/lib/utils';
 import { useProducts, useProductCategories } from '@/hooks/useApi';
 import heroSlideOne from '@/assets/manganese/one.jpeg';
@@ -519,12 +520,12 @@ const Products = ({ type }: ProductsProps) => {
           <p className="text-lg mb-6 opacity-90">
             {translate('ctaSubtitle')}
           </p>
-          <a
-            href="/contact"
+          <Link
+            to={getLocalizedLink('/contact', language)}
             className="inline-block bg-primary text-primary-foreground px-8 py-3 rounded-md font-semibold hover:bg-primary/90 transition-colors"
           >
             {translate('contactUs')}
-          </a>
+          </Link>
         </div>
       </div>
     </div>

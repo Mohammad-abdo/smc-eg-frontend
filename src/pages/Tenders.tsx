@@ -5,7 +5,9 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Link } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { getLocalizedLink } from '@/hooks/useLocalizedNavigate';
 import { cn } from '@/lib/utils';
 import { useTenders, useSubmitTender } from '@/hooks/useApi';
 import { toast } from 'sonner';
@@ -188,7 +190,7 @@ const Tenders = () => {
               : 'For tender inquiries, clarifications, or submission guidelines, please contact our procurement team'}
           </p>
           <Button asChild size="lg">
-            <a href="/contact">{t('contactUs')}</a>
+            <Link to={getLocalizedLink('/contact', language)}>{t('contactUs')}</Link>
           </Button>
         </div>
       </div>

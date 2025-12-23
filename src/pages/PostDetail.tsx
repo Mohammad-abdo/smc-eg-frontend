@@ -3,6 +3,7 @@ import { ArrowLeft, Calendar, Tag } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { getLocalizedLink } from '@/hooks/useLocalizedNavigate';
 import { cn } from '@/lib/utils';
 import { useNews } from '@/hooks/useApi';
 import slideOne from '@/assets/manganese/one.jpeg';
@@ -184,7 +185,7 @@ const PostDetail = () => {
           <h1 className="text-4xl font-bold mb-4">Post Not Found</h1>
           <p className="text-muted-foreground mb-6">The post you're looking for doesn't exist.</p>
           <Button asChild>
-            <Link to="/news">Back to News</Link>
+            <Link to={getLocalizedLink('/news', language)}>Back to News</Link>
           </Button>
         </div>
       </div>
@@ -197,7 +198,7 @@ const PostDetail = () => {
         {/* Back Button */}
         <div className="mb-8">
           <Button asChild variant="ghost" className={cn('gap-2', isRTL && 'flex-row-reverse')}>
-            <Link to="/news">
+            <Link to={getLocalizedLink('/news', language)}>
               <ArrowLeft className={cn('h-4 w-4', isRTL && 'rotate-180')} />
               {t('backToNews') || 'Back to News'}
             </Link>
@@ -242,7 +243,7 @@ const PostDetail = () => {
         {/* Related Posts or CTA */}
         <div className="mt-12 text-center">
           <Button asChild size="lg" variant="outline">
-            <Link to="/news">{t('viewAllNews') || 'View All News'}</Link>
+            <Link to={getLocalizedLink('/news', language)}>{t('viewAllNews') || 'View All News'}</Link>
           </Button>
         </div>
       </div>
