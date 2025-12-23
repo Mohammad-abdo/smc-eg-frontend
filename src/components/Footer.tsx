@@ -17,8 +17,10 @@ const Footer = () => {
   
   // Get phone numbers from settings
   const salesPhones: PhoneNumber[] = settings.phoneNumbersSales || [];
+  const salesFax: PhoneNumber[] = settings.faxNumbersSales || [];
   const adminPhones: PhoneNumber[] = settings.phoneNumbersAdmin || [];
-  const faxNumbers: PhoneNumber[] = settings.faxNumbers || [];
+  const adminFax: PhoneNumber[] = settings.faxNumbersAdmin || [];
+  const complaintsEmail = settings.complaintsEmail || settings.email || 'info1@smc-eg.com';
 
   const footerNavigation = [
     { name: t('home'), href: '/' },
@@ -37,43 +39,48 @@ const Footer = () => {
           <div className={cn('grid gap-10 lg:grid-cols-4', isRTL && 'text-right')}>
             {/* Column 1: Phone Numbers */}
             <div>
-              {salesPhones.length > 0 && (
+              {/* Sales Numbers Section */}
+              {(salesPhones.length > 0 || salesFax.length > 0) && (
                 <>
                   <h3 className="mb-4 text-xs font-semibold uppercase tracking-[0.4em] text-white/90">
                     {isRTL ? 'أرقام المبيعات' : 'Sales Numbers'}
                   </h3>
-                  <div className="mb-6">
-                    <PhoneNumbers phones={salesPhones} />
+                  <div className="mb-4">
+                    {salesPhones.length > 0 && <PhoneNumbers phones={salesPhones} />}
+                    {salesFax.length > 0 && (
+                      <div className="mt-3">
+                        <PhoneNumbers phones={salesFax} showLabels />
+                      </div>
+                    )}
                   </div>
                 </>
               )}
-              {adminPhones.length > 0 && (
+              
+              {/* Administration Numbers Section */}
+              {(adminPhones.length > 0 || adminFax.length > 0) && (
                 <>
                   <h3 className="mb-4 text-xs font-semibold uppercase tracking-[0.4em] text-white/90">
                     {isRTL ? 'أرقام الإدارة' : 'Administration Numbers'}
                   </h3>
-                  <div className="mb-6">
-                    <PhoneNumbers phones={adminPhones} />
+                  <div className="mb-4">
+                    {adminPhones.length > 0 && <PhoneNumbers phones={adminPhones} />}
+                    {adminFax.length > 0 && (
+                      <div className="mt-3">
+                        <PhoneNumbers phones={adminFax} showLabels />
+                      </div>
+                    )}
                   </div>
                 </>
               )}
-              {faxNumbers.length > 0 && (
-                <>
-                  <h3 className="mb-4 text-xs font-semibold uppercase tracking-[0.4em] text-white/90">
-                    {isRTL ? 'أرقام الفاكس' : 'Fax Numbers'}
-                  </h3>
-                  <div className="mb-6">
-                    <PhoneNumbers phones={faxNumbers} showLabels />
-                  </div>
-                </>
-              )}
+              
+              {/* Complaints Email */}
               <div className="mt-6 pt-6 border-t border-white/10">
                 <a 
-                  href={`mailto:${settings.email}`} 
+                  href={`mailto:${complaintsEmail}`} 
                   className={cn('flex items-center gap-3 text-white/70 hover:text-white transition', isRTL && 'flex-row-reverse')}
                 >
                   <Mail className="h-5 w-5 text-primary flex-shrink-0" />
-                  <span className="text-sm">{settings.email}</span>
+                  <span className="text-sm">{complaintsEmail}</span>
                   <span className="text-xs text-white/50">({isRTL ? 'للشكاوى' : 'For Complaints'})</span>
                 </a>
               </div>

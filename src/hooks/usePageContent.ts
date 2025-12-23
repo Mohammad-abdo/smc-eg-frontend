@@ -284,8 +284,10 @@ export const useSettings = () => {
           linkedin:
             settingsObj.linkedin_url?.valueEn || defaultSettings.linkedin,
           phoneNumbersSales: parsePhoneNumbers("phone_numbers_sales"),
+          faxNumbersSales: parsePhoneNumbers("fax_numbers_sales"),
           phoneNumbersAdmin: parsePhoneNumbers("phone_numbers_admin"),
-          faxNumbers: parsePhoneNumbers("fax_numbers"),
+          faxNumbersAdmin: parsePhoneNumbers("fax_numbers_admin"),
+          complaintsEmail: settingsObj.complaints_email?.[language === "ar" ? "valueAr" : "valueEn"] || "",
         };
 
         setSettings(newSettings);
@@ -390,8 +392,10 @@ export const useSettings = () => {
             linkedin:
               settingsObj.linkedin_url?.valueEn || defaultSettings.linkedin,
             phoneNumbersSales: parsePhoneNumbers("phone_numbers_sales"),
+            faxNumbersSales: parsePhoneNumbers("fax_numbers_sales"),
             phoneNumbersAdmin: parsePhoneNumbers("phone_numbers_admin"),
-            faxNumbers: parsePhoneNumbers("fax_numbers"),
+            faxNumbersAdmin: parsePhoneNumbers("fax_numbers_admin"),
+            complaintsEmail: settingsObj.complaints_email?.[language === "ar" ? "valueAr" : "valueEn"] || "",
           };
 
           setSettings(newSettings);
@@ -459,7 +463,9 @@ export const useSettings = () => {
     twitter: safeSettings.twitter || defaultSettings.twitter,
     linkedin: safeSettings.linkedin || defaultSettings.linkedin,
     phoneNumbersSales: safeSettings.phoneNumbersSales || [],
+    faxNumbersSales: safeSettings.faxNumbersSales || [],
     phoneNumbersAdmin: safeSettings.phoneNumbersAdmin || [],
-    faxNumbers: safeSettings.faxNumbers || [],
+    faxNumbersAdmin: safeSettings.faxNumbersAdmin || [],
+    complaintsEmail: safeSettings.complaintsEmail || "",
   };
 };

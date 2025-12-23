@@ -25,8 +25,9 @@ const Contact = () => {
   // Combine all phone numbers for display
   const allPhones = [
     ...(settings.phoneNumbersSales || []),
+    ...(settings.faxNumbersSales || []),
     ...(settings.phoneNumbersAdmin || []),
-    ...(settings.faxNumbers || []),
+    ...(settings.faxNumbersAdmin || []),
   ];
 
   const handleSubmit = (e: React.FormEvent) => {

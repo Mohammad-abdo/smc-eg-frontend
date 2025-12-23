@@ -28,8 +28,10 @@ const Settings = () => {
     linkedin: '',
     clientLogos: [] as string[], // Array of base64 images
     phoneNumbersSales: [] as Array<{ number: string; type: 'phone' | 'fax'; label?: string }>,
+    faxNumbersSales: [] as Array<{ number: string; type: 'phone' | 'fax'; label?: string }>,
     phoneNumbersAdmin: [] as Array<{ number: string; type: 'phone' | 'fax'; label?: string }>,
-    faxNumbers: [] as Array<{ number: string; type: 'phone' | 'fax'; label?: string }>,
+    faxNumbersAdmin: [] as Array<{ number: string; type: 'phone' | 'fax'; label?: string }>,
+    complaintsEmail: 'info1@smc-eg.com',
   });
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -77,8 +79,10 @@ const Settings = () => {
           twitter: settingsObj.twitter_url?.valueEn || '',
           linkedin: settingsObj.linkedin_url?.valueEn || '',
           phoneNumbersSales: parsePhoneNumbers('phone_numbers_sales'),
+          faxNumbersSales: parsePhoneNumbers('fax_numbers_sales'),
           phoneNumbersAdmin: parsePhoneNumbers('phone_numbers_admin'),
-          faxNumbers: parsePhoneNumbers('fax_numbers'),
+          faxNumbersAdmin: parsePhoneNumbers('fax_numbers_admin'),
+          complaintsEmail: settingsObj.complaints_email?.valueEn || 'info1@smc-eg.com',
           clientLogos: [] as string[],
         };
 
@@ -125,14 +129,24 @@ const Settings = () => {
           valueAr: JSON.stringify(settings.phoneNumbersSales) 
         },
         { 
+          key: 'fax_numbers_sales', 
+          valueEn: JSON.stringify(settings.faxNumbersSales), 
+          valueAr: JSON.stringify(settings.faxNumbersSales) 
+        },
+        { 
           key: 'phone_numbers_admin', 
           valueEn: JSON.stringify(settings.phoneNumbersAdmin), 
           valueAr: JSON.stringify(settings.phoneNumbersAdmin) 
         },
         { 
-          key: 'fax_numbers', 
-          valueEn: JSON.stringify(settings.faxNumbers), 
-          valueAr: JSON.stringify(settings.faxNumbers) 
+          key: 'fax_numbers_admin', 
+          valueEn: JSON.stringify(settings.faxNumbersAdmin), 
+          valueAr: JSON.stringify(settings.faxNumbersAdmin) 
+        },
+        { 
+          key: 'complaints_email', 
+          valueEn: settings.complaintsEmail, 
+          valueAr: settings.complaintsEmail 
         },
       ];
 
@@ -383,19 +397,19 @@ const Settings = () => {
                 ))}
               </div>
 
-              {/* Fax Numbers */}
+              {/* Sales Fax Numbers */}
               <div className="space-y-3 pt-4 border-t border-white/10">
                 <div className="flex items-center justify-between">
                   <Label className="text-white text-base font-semibold">
                     <Printer className="h-4 w-4 inline mr-2" />
-                    {isRTL ? 'أرقام الفاكس' : 'Fax Numbers'}
+                    {isRTL ? 'أرقام فاكس المبيعات' : 'Sales Fax Numbers'}
                   </Label>
                   <Button
                     type="button"
                     size="sm"
                     onClick={() => setSettings({
                       ...settings,
-                      faxNumbers: [...settings.faxNumbers, { number: '', type: 'fax', label: '' }]
+                      faxNumbersSales: [...settings.faxNumbersSales, { number: '', type: 'fax', label: 'Sales Fax' }]
                     })}
                     className="bg-[#204393] hover:bg-[#1b356f] text-white"
                   >
@@ -403,14 +417,14 @@ const Settings = () => {
                     {isRTL ? 'إضافة' : 'Add'}
                   </Button>
                 </div>
-                {settings.faxNumbers.map((fax, index) => (
+                {settings.faxNumbersSales.map((fax, index) => (
                   <div key={index} className="flex gap-2 items-center">
                     <Input
                       value={fax.number}
                       onChange={(e) => {
-                        const updated = [...settings.faxNumbers];
+                        const updated = [...settings.faxNumbersSales];
                         updated[index] = { ...updated[index], number: e.target.value };
-                        setSettings({ ...settings, faxNumbers: updated });
+                        setSettings({ ...settings, faxNumbersSales: updated });
                       }}
                       placeholder={isRTL ? 'رقم الفاكس' : 'Fax number'}
                       className="bg-white/10 border-white/20 text-white flex-1"
@@ -418,9 +432,9 @@ const Settings = () => {
                     <Input
                       value={fax.label || ''}
                       onChange={(e) => {
-                        const updated = [...settings.faxNumbers];
+                        const updated = [...settings.faxNumbersSales];
                         updated[index] = { ...updated[index], label: e.target.value };
-                        setSettings({ ...settings, faxNumbers: updated });
+                        setSettings({ ...settings, faxNumbersSales: updated });
                       }}
                       placeholder={isRTL ? 'التسمية (اختياري)' : 'Label (optional)'}
                       className="bg-white/10 border-white/20 text-white w-32"
@@ -431,13 +445,86 @@ const Settings = () => {
                       size="sm"
                       onClick={() => setSettings({
                         ...settings,
-                        faxNumbers: settings.faxNumbers.filter((_, i) => i !== index)
+                        faxNumbersSales: settings.faxNumbersSales.filter((_, i) => i !== index)
                       })}
                     >
                       <X className="h-4 w-4" />
                     </Button>
                   </div>
                 ))}
+              </div>
+
+              {/* Administration Fax Numbers */}
+              <div className="space-y-3 pt-4 border-t border-white/10">
+                <div className="flex items-center justify-between">
+                  <Label className="text-white text-base font-semibold">
+                    <Printer className="h-4 w-4 inline mr-2" />
+                    {isRTL ? 'أرقام فاكس الإدارة' : 'Administration Fax Numbers'}
+                  </Label>
+                  <Button
+                    type="button"
+                    size="sm"
+                    onClick={() => setSettings({
+                      ...settings,
+                      faxNumbersAdmin: [...settings.faxNumbersAdmin, { number: '', type: 'fax', label: 'Admin Fax' }]
+                    })}
+                    className="bg-[#204393] hover:bg-[#1b356f] text-white"
+                  >
+                    <Plus className="h-4 w-4 mr-1" />
+                    {isRTL ? 'إضافة' : 'Add'}
+                  </Button>
+                </div>
+                {settings.faxNumbersAdmin.map((fax, index) => (
+                  <div key={index} className="flex gap-2 items-center">
+                    <Input
+                      value={fax.number}
+                      onChange={(e) => {
+                        const updated = [...settings.faxNumbersAdmin];
+                        updated[index] = { ...updated[index], number: e.target.value };
+                        setSettings({ ...settings, faxNumbersAdmin: updated });
+                      }}
+                      placeholder={isRTL ? 'رقم الفاكس' : 'Fax number'}
+                      className="bg-white/10 border-white/20 text-white flex-1"
+                    />
+                    <Input
+                      value={fax.label || ''}
+                      onChange={(e) => {
+                        const updated = [...settings.faxNumbersAdmin];
+                        updated[index] = { ...updated[index], label: e.target.value };
+                        setSettings({ ...settings, faxNumbersAdmin: updated });
+                      }}
+                      placeholder={isRTL ? 'التسمية (اختياري)' : 'Label (optional)'}
+                      className="bg-white/10 border-white/20 text-white w-32"
+                    />
+                    <Button
+                      type="button"
+                      variant="destructive"
+                      size="sm"
+                      onClick={() => setSettings({
+                        ...settings,
+                        faxNumbersAdmin: settings.faxNumbersAdmin.filter((_, i) => i !== index)
+                      })}
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ))}
+              </div>
+
+              {/* Complaints Email */}
+              <div className="space-y-2 pt-4 border-t border-white/10">
+                <Label className="text-white">
+                  <Mail className="h-4 w-4 inline mr-2" />
+                  {isRTL ? 'البريد الإلكتروني للشكاوى' : 'Complaints Email'}
+                </Label>
+                <Input
+                  type="email"
+                  value={settings.complaintsEmail}
+                  onChange={(e) => setSettings({ ...settings, complaintsEmail: e.target.value })}
+                  placeholder={isRTL ? 'info1@smc-eg.com' : 'info1@smc-eg.com'}
+                  className="bg-white/10 border-white/20 text-white"
+                />
+                <p className="text-xs text-white/50">{isRTL ? 'البريد الإلكتروني المخصص لاستقبال الشكاوى' : 'Email address specifically for receiving complaints'}</p>
               </div>
               <div className="grid gap-4 md:grid-cols-2">
                 <div className="space-y-2">
