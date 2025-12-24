@@ -1,9 +1,10 @@
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { getLocalizedLink } from '@/hooks/useLocalizedNavigate';
 import { useProducts, useProductCategories } from '@/hooks/useApi';
 import { Card, CardContent, CardTitle } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
-import { ArrowLeft, Loader2, Factory } from 'lucide-react';
+import { ArrowLeft, Loader2, Factory, Package } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 const CategoryProducts = () => {
@@ -51,7 +52,7 @@ const CategoryProducts = () => {
           <p className="text-muted-foreground mb-4">
             {language === 'ar' ? 'القسم غير موجود' : 'Category not found'}
           </p>
-          <Button onClick={() => navigate('/products')}>
+          <Button onClick={() => navigate(getLocalizedLink('/products', language))}>
             {language === 'ar' ? 'العودة للمنتجات' : 'Back to Products'}
           </Button>
         </div>
@@ -64,7 +65,7 @@ const CategoryProducts = () => {
       <div className="container mx-auto px-4">
         <Button
           variant="ghost"
-          onClick={() => navigate('/products')}
+          onClick={() => navigate(getLocalizedLink('/products', language))}
           className={cn('mb-6', isRTL && 'ml-auto')}
         >
           <ArrowLeft className={cn('h-4 w-4 mr-2', isRTL && 'ml-2 mr-0 rotate-180')} />
@@ -86,9 +87,17 @@ const CategoryProducts = () => {
         </div>
 
         {categoryProducts.length === 0 ? (
-          <div className="text-center py-12">
-            <p className="text-muted-foreground">
-              {language === 'ar' ? 'لا توجد منتجات متاحة في هذا القسم' : 'No products available in this category'}
+          <div className={cn("flex flex-col items-center justify-center py-20", isRTL && "text-right")}>
+            <div className="mb-6 p-6 rounded-full bg-muted">
+              <Package className="h-16 w-16 text-muted-foreground" />
+            </div>
+            <h2 className="text-2xl font-semibold mb-3">
+              {language === 'ar' ? 'لا توجد منتجات بعد' : 'No Products Yet'}
+            </h2>
+            <p className="text-muted-foreground text-center max-w-md">
+              {language === 'ar' 
+                ? `لم يتم إضافة أي منتجات في فئة ${mainCategory.nameAr} حتى الآن. تحقق مرة أخرى لاحقاً.`
+                : `No products have been added to the ${mainCategory.name} category yet. Check back later.`}
             </p>
           </div>
         ) : (
@@ -100,7 +109,7 @@ const CategoryProducts = () => {
                 : undefined;
               
               return (
-                <Link key={product.id} to={`/product/${product.id}`}>
+                <Link key={product.id} to={getLocalizedLink(`/product/${product.id}`, language)}>
                   <Card className="group overflow-hidden border border-border shadow-lg transition-all hover:shadow-2xl hover:-translate-y-2 cursor-pointer">
                     <div className="relative h-64 overflow-hidden bg-muted">
                       {productImage ? (

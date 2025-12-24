@@ -1,8 +1,9 @@
 import { Link } from 'react-router-dom';
-import { Calendar, ArrowRight } from 'lucide-react';
+import { Calendar, ArrowRight, Newspaper } from 'lucide-react';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { getLocalizedLink } from '@/hooks/useLocalizedNavigate';
 import { cn } from '@/lib/utils';
 import { useNews } from '@/hooks/useApi';
 import slideOne from '@/assets/manganese/one.jpeg';
@@ -15,6 +16,7 @@ import portfolio16 from '@/assets/manganese/portfolio16.jpg';
 const News = () => {
   const { t, isRTL, language } = useLanguage();
   const { data: news = [], isLoading: newsLoading } = useNews();
+  console.log(news);
 
   const defaultImages = [slideOne, slideTwo, slideThree, homeImage, portfolio14, portfolio16];
   
@@ -27,106 +29,6 @@ const News = () => {
       excerpt: language === 'ar' ? (item.contentAr?.substring(0, 150) || '') : (item.content?.substring(0, 150) || ''),
       image: item.image || defaultImages[item.id % defaultImages.length],
     }));
-
-  const fallbackNewsItems = language === 'ar' ? [
-    {
-      id: 1,
-      title: 'شركة سيناء للمنجنيز توسع قدرتها الإنتاجية',
-      date: '2024-11-01',
-      excerpt: 'تعلن شركة سيناء للمنجنيز عن توسع كبير في مرافق الإنتاج، مما يزيد الإنتاج السنوي بنسبة 20%.',
-      category: 'أخبار الشركة',
-      image: slideOne,
-    },
-    {
-      id: 2,
-      title: 'تحقيق شهادات جودة جديدة',
-      date: '2024-10-15',
-      excerpt: 'تحصل شركة سيناء للمنجنيز على شهادات جودة دولية، مما يعزز التزامنا بالتميز.',
-      category: 'الجوائز',
-      image: slideTwo,
-    },
-    {
-      id: 3,
-      title: 'إطلاق مبادرة الاستدامة',
-      date: '2024-09-28',
-      excerpt: 'إطلاق برامج استدامة بيئية جديدة للحد من البصمة الكربونية.',
-      category: 'الاستدامة',
-      image: slideThree,
-    },
-    {
-      id: 4,
-      title: 'شراكة مع مصنعي الصلب الرائدين',
-      date: '2024-09-10',
-      excerpt: 'توقع شركة سيناء للمنجنيز شراكات استراتيجية مع منتجي الصلب الرئيسيين في جميع أنحاء الشرق الأوسط.',
-      category: 'الشراكة',
-      image: homeImage,
-    },
-    {
-      id: 5,
-      title: 'الاستثمار في الطاقة المتجددة',
-      date: '2024-08-22',
-      excerpt: 'تركيب طاقة شمسية جديدة لدعم محطة الطاقة الغازية.',
-      category: 'البنية التحتية',
-      image: portfolio14,
-    },
-    {
-      id: 6,
-      title: 'نجاح برنامج تدريب الموظفين',
-      date: '2024-08-05',
-      excerpt: 'أكمل أكثر من 200 موظف برامج تدريب تقنية متقدمة.',
-      category: 'التدريب',
-      image: portfolio16,
-    },
-  ] : [
-    {
-      id: 1,
-      title: 'SMC Expands Production Capacity',
-      date: '2024-11-01',
-      excerpt: 'Sinai Manganese Company announces major expansion of production facilities, increasing annual output by 20%.',
-      category: 'Company News',
-      image: slideOne,
-    },
-    {
-      id: 2,
-      title: 'New Quality Certifications Achieved',
-      date: '2024-10-15',
-      excerpt: 'SMC receives international quality certifications, reinforcing our commitment to excellence.',
-      category: 'Awards',
-      image: slideTwo,
-    },
-    {
-      id: 3,
-      title: 'Sustainability Initiative Launch',
-      date: '2024-09-28',
-      excerpt: 'Introduction of new environmental sustainability programs to reduce carbon footprint.',
-      category: 'Sustainability',
-      image: slideThree,
-    },
-    {
-      id: 4,
-      title: 'Partnership with Leading Steel Manufacturers',
-      date: '2024-09-10',
-      excerpt: 'SMC signs strategic partnerships with major steel producers across the Middle East.',
-      category: 'Partnership',
-      image: homeImage,
-    },
-    {
-      id: 5,
-      title: 'Investment in Renewable Energy',
-      date: '2024-08-22',
-      excerpt: 'New solar power installation to supplement gas turbine power station.',
-      category: 'Infrastructure',
-      image: portfolio14,
-    },
-    {
-      id: 6,
-      title: 'Employee Training Program Success',
-      date: '2024-08-05',
-      excerpt: 'Over 200 employees complete advanced technical training programs.',
-      category: 'Training',
-      image: portfolio16,
-    },
-  ];
 
   return (
     <div className="min-h-screen pt-32 pb-20">
@@ -144,9 +46,23 @@ const News = () => {
           <div className="text-center py-12">
             <p className="text-muted-foreground">{language === 'ar' ? 'جاري تحميل الأخبار...' : 'Loading news...'}</p>
           </div>
+        ) : newsItemsFromAPI.length === 0 ? (
+          <div className={cn("flex flex-col items-center justify-center py-20", isRTL && "text-right")}>
+            <div className="mb-6 p-6 rounded-full bg-muted">
+              <Newspaper className="h-16 w-16 text-muted-foreground" />
+            </div>
+            <h2 className="text-2xl font-semibold mb-3">
+              {language === 'ar' ? 'لا توجد أخبار بعد' : 'No News Yet'}
+            </h2>
+            <p className="text-muted-foreground text-center max-w-md">
+              {language === 'ar' 
+                ? 'لم يتم نشر أي أخبار حتى الآن. تحقق مرة أخرى لاحقاً للحصول على آخر التحديثات.'
+                : 'No news have been published yet. Check back later for the latest updates.'}
+            </p>
+          </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {(newsItemsFromAPI.length > 0 ? newsItemsFromAPI : fallbackNewsItems).map((item) => (
+            {newsItemsFromAPI.map((item) => (
             <Card key={item.id} className="flex flex-col overflow-hidden bg-white hover:shadow-xl transition-all">
               <div className="group relative h-48 w-full overflow-hidden">
                 <img
@@ -180,8 +96,8 @@ const News = () => {
               </CardContent>
               <CardFooter>
                 <Button asChild variant="ghost" className="w-full group">
-                  <Link to={`/news/${item.id}`}>
-                    Read More
+                  <Link to={getLocalizedLink(`/news/${item.id}`, language)}>
+                    {language === 'ar' ? 'اقرأ المزيد' : 'Read More'}
                     <ArrowRight className={cn(
                       "ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform",
                       isRTL && "rotate-180"

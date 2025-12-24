@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Factory, Atom, Wrench, Sparkles, Beaker, Flame } from 'lucide-react';
+import { Factory, Atom, Wrench, Sparkles, Beaker, Flame, Package } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -104,8 +104,8 @@ const Products = ({ type }: ProductsProps) => {
           id: product.id.toString(),
           name: lang === 'ar' ? product.nameAr : product.name,
           description: lang === 'ar' ? product.descriptionAr : product.description,
-          image: productImage || product.product?.image || product.image,
-          updated_at: product.updated_at || product.updatedAt || product.product?.updated_at,
+          image: productImage || product.image,
+          updated_at: product.updated_at,
           icon: ProductIcon,
           product: product,
         };
@@ -312,7 +312,7 @@ const Products = ({ type }: ProductsProps) => {
               {productsFromAPI.map((product) => {
                 const ProductIcon = product.icon || Factory;
                 return (
-                <Link key={product.id} to={`/product/${product.id}`}>
+                <Link key={product.id} to={getLocalizedLink(`/product/${product.id}`, lang)}>
                   <Card className="group overflow-hidden border border-border shadow-lg transition-all hover:shadow-2xl hover:-translate-y-2 cursor-pointer">
                     <div className="relative h-64 overflow-hidden bg-muted">
                       {product.image ? (
@@ -356,9 +356,17 @@ const Products = ({ type }: ProductsProps) => {
               })}
             </div>
           ) : (
-            <div className="text-center py-12">
-              <p className="text-muted-foreground">
-                {lang === 'ar' ? 'لا توجد منتجات في هذا القسم' : 'No products in this category'}
+            <div className={cn("flex flex-col items-center justify-center py-20", isRTL && "text-right")}>
+              <div className="mb-6 p-6 rounded-full bg-muted">
+                <Package className="h-16 w-16 text-muted-foreground" />
+              </div>
+              <h2 className="text-2xl font-semibold mb-3">
+                {lang === 'ar' ? 'لا توجد منتجات بعد' : 'No Products Yet'}
+              </h2>
+              <p className="text-muted-foreground text-center max-w-md">
+                {lang === 'ar' 
+                  ? `لم يتم إضافة أي منتجات في فئة ${type === 'mining' ? 'التعدين' : 'الصناعية'} حتى الآن. تحقق مرة أخرى لاحقاً.`
+                  : `No products have been added to the ${type === 'mining' ? 'mining' : 'industrial'} category yet. Check back later.`}
               </p>
             </div>
           )}
@@ -450,6 +458,7 @@ const Products = ({ type }: ProductsProps) => {
         name: language === 'ar' ? product.nameAr : product.name,
         description: language === 'ar' ? product.descriptionAr : product.description,
         image: productImage,
+        updated_at: product.updated_at,
         icon: ProductIcon,
       };
     });
@@ -467,14 +476,16 @@ const Products = ({ type }: ProductsProps) => {
 
         {productsLoading ? (
           <div className="text-center py-12">
-            <p className="text-muted-foreground">Loading products...</p>
+            <p className="text-muted-foreground">
+              {language === 'ar' ? 'جاري تحميل المنتجات...' : 'Loading products...'}
+            </p>
           </div>
-        ) : (
+        ) : industrialProductsFromAPI.length > 0 ? (
           <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:max-w-5xl lg:mx-auto">
             {industrialProductsFromAPI.map((product) => {
               const ProductIcon = product.icon || Factory;
               return (
-              <Link key={product.id} to={`/product/${product.id}`}>
+              <Link key={product.id} to={getLocalizedLink(`/product/${product.id}`, language)}>
                 <Card className="group overflow-hidden border border-border shadow-lg transition-all hover:shadow-2xl hover:-translate-y-2 cursor-pointer">
                   <div className="relative h-64 overflow-hidden bg-muted">
                     {product.image ? (
@@ -512,6 +523,20 @@ const Products = ({ type }: ProductsProps) => {
               </Link>
               );
             })}
+          </div>
+        ) : (
+          <div className={cn("flex flex-col items-center justify-center py-20", rtl && "text-right")}>
+            <div className="mb-6 p-6 rounded-full bg-muted">
+              <Package className="h-16 w-16 text-muted-foreground" />
+            </div>
+            <h2 className="text-2xl font-semibold mb-3">
+              {language === 'ar' ? 'لا توجد منتجات بعد' : 'No Products Yet'}
+            </h2>
+            <p className="text-muted-foreground text-center max-w-md">
+              {language === 'ar' 
+                ? 'لم يتم إضافة أي منتجات صناعية حتى الآن. تحقق مرة أخرى لاحقاً للحصول على آخر المنتجات.'
+                : 'No industrial products have been added yet. Check back later for the latest products.'}
+            </p>
           </div>
         )}
 
