@@ -32,7 +32,7 @@ import {
 } from '@/components/ui/carousel';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { getLocalizedLink } from '@/hooks/useLocalizedNavigate';
-import { cn } from '@/lib/utils';
+import { cn, getImageUrl } from '@/lib/utils';
 import { useProducts, useProductCategories } from '@/hooks/useApi';
 import { useBanners } from '@/hooks/useApi';
 import { useNews } from '@/hooks/useApi';
@@ -316,7 +316,7 @@ const Home = () => {
           {activeBanners.map((banner, index) => (
             <img
               key={banner.id || index}
-              src={banner.image || heroSlides[index]?.src}
+              src={banner.image ? getImageUrl(banner.image) : heroSlides[index]?.src}
               alt={banner.title || heroSlides[index]?.alt || 'Hero banner'}
               className={cn(
                 'absolute inset-0 h-full w-full object-cover transition-all ease-out scale-105',

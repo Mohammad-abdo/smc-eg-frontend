@@ -8,7 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { cn } from '@/lib/utils';
+import { cn, getImageUrl } from '@/lib/utils';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useNews, useCreateNews, useUpdateNews, useDeleteNews } from '@/hooks/useApi';
 import { toast } from 'sonner';
@@ -18,6 +18,7 @@ const NewsManagement = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [editingNews, setEditingNews] = useState<any>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [imageFile, setImageFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const { data: news = [], isLoading } = useNews();
@@ -27,6 +28,7 @@ const NewsManagement = () => {
 
   const handleEdit = (item: any) => {
     setEditingNews({ ...item });
+    setImageFile(null); // Reset image file when editing
     setIsDialogOpen(true);
   };
 
@@ -34,17 +36,25 @@ const NewsManagement = () => {
     if (editingNews) {
       try {
         if (editingNews.id) {
-          await updateNews.mutateAsync({ id: editingNews.id, updates: editingNews });
+          await updateNews.mutateAsync({ 
+            id: editingNews.id, 
+            updates: editingNews,
+            imageFile: imageFile || undefined
+          });
           toast.success('News updated successfully');
         } else {
-          await createNews.mutateAsync(editingNews);
+          await createNews.mutateAsync({
+            news: editingNews,
+            imageFile: imageFile || undefined
+          });
           toast.success('News created successfully');
         }
         setIsDialogOpen(false);
         setEditingNews(null);
+        setImageFile(null);
       } catch (error: any) {
         console.error('Error saving news:', error);
-        const errorMessage = error?.message || 'Unknown error';
+        const errorMessage = error?.response?.data?.error || error?.message || 'Unknown error';
         toast.error(`Failed to save news: ${errorMessage}`);
       }
     }
@@ -71,7 +81,9 @@ const NewsManagement = () => {
       status: 'draft' as const,
       content: '',
       contentAr: '',
+      image: '',
     });
+    setImageFile(null);
     setIsDialogOpen(true);
   };
 
@@ -182,10 +194,10 @@ const NewsManagement = () => {
               <div className="space-y-2">
                 <Label className="text-white">{t('image') || 'Image'}</Label>
                 <div className="flex items-center gap-4">
-                  {editingNews.image ? (
+                  {(editingNews.image || imageFile) ? (
                     <div className="relative">
                       <img
-                        src={editingNews.image}
+                        src={imageFile ? URL.createObjectURL(imageFile) : getImageUrl(editingNews.image)}
                         alt="News"
                         className="w-32 h-32 object-cover rounded-lg border border-white/20"
                       />
@@ -193,7 +205,10 @@ const NewsManagement = () => {
                         type="button"
                         variant="ghost"
                         size="icon"
-                        onClick={() => setEditingNews({ ...editingNews, image: '' })}
+                        onClick={() => {
+                          setEditingNews({ ...editingNews, image: '' });
+                          setImageFile(null);
+                        }}
                         className="absolute -top-2 -right-2 bg-red-500/80 hover:bg-red-500 text-white h-6 w-6 rounded-full"
                       >
                         <X className="h-3 w-3" />
@@ -212,17 +227,20 @@ const NewsManagement = () => {
                       onChange={(e) => {
                         const file = e.target.files?.[0];
                         if (file) {
-                          if (file.size > 2 * 1024 * 1024) {
-                            toast.error('Image size must be less than 2MB');
+                          if (file.size > 10 * 1024 * 1024) {
+                            toast.error('Image size must be less than 10MB');
                             return;
                           }
+                          // Store the file for upload
+                          setImageFile(file);
+                          // Also create a preview URL for display
                           const reader = new FileReader();
                           reader.onloadend = () => {
                             setEditingNews({
                               ...editingNews,
-                              image: reader.result as string,
+                              image: reader.result as string, // Preview only
                             });
-                            toast.success('Image uploaded successfully');
+                            toast.success('Image selected successfully');
                           };
                           reader.onerror = () => {
                             toast.error('Error reading image file');

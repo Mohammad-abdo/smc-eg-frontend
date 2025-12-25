@@ -4,8 +4,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { cn } from '@/lib/utils';
-import { useMedia, useUploadMedia } from '@/hooks/useApi';
+import { cn, getImageUrl } from '@/lib/utils';
+import { useMedia, useUploadMedia, useDeleteMedia } from '@/hooks/useApi';
 import { toast } from 'sonner';
 
 const MediaLibrary = () => {
@@ -17,6 +17,7 @@ const MediaLibrary = () => {
 
   const { data: mediaItems = [], isLoading } = useMedia();
   const uploadMedia = useUploadMedia();
+  const deleteMedia = useDeleteMedia();
 
   const filteredMedia = mediaItems.filter(m =>
     m.name.toLowerCase().includes(searchTerm.toLowerCase())
@@ -41,9 +42,15 @@ const MediaLibrary = () => {
     }
   };
 
-  const handleDelete = async (id: number) => {
-    // TODO: Implement delete functionality
-    toast.info(language === 'ar' ? 'سيتم تنفيذ حذف الملف قريباً' : 'Delete functionality coming soon');
+  const handleDelete = async (id: string) => {
+    if (confirm(language === 'ar' ? 'هل أنت متأكد من حذف هذا الملف؟' : 'Are you sure you want to delete this file?')) {
+      try {
+        await deleteMedia.mutateAsync(id);
+        toast.success(language === 'ar' ? 'تم حذف الملف بنجاح' : 'File deleted successfully');
+      } catch (error) {
+        toast.error(language === 'ar' ? 'فشل حذف الملف' : 'Failed to delete file');
+      }
+    }
   };
 
   if (isLoading) {
@@ -117,13 +124,34 @@ const MediaLibrary = () => {
         </CardContent>
       </Card>
 
-      {viewMode === 'grid' ? (
+      {filteredMedia.length === 0 ? (
+        <div className="flex flex-col items-center justify-center py-20 text-center">
+          <div className="mb-6 rounded-full bg-muted p-6">
+            <ImageIcon className="h-16 w-16 text-muted-foreground" />
+          </div>
+          <h2 className="mb-3 text-3xl font-bold">
+            {language === 'ar' ? 'لا توجد ملفات وسائط' : 'No Media Files'}
+          </h2>
+          <p className="max-w-md text-muted-foreground mb-4">
+            {language === 'ar'
+              ? 'يبدو أنه لا توجد ملفات وسائط متاحة. ابدأ برفع ملفاتك الأولى.'
+              : 'It seems there are no media files available. Start by uploading your first files.'}
+          </p>
+          <Button 
+            onClick={handleUploadClick}
+            className="bg-[#204393] hover:bg-[#1b356f] text-white"
+          >
+            <Upload className="h-4 w-4 mr-2" />
+            {t('uploadMedia') || 'Upload Media'}
+          </Button>
+        </div>
+      ) : viewMode === 'grid' ? (
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {filteredMedia.map((item) => (
             <Card key={item.id} className="group relative overflow-hidden">
               <div className="aspect-square relative">
                 <img
-                  src={item.url}
+                  src={getImageUrl(item.url)}
                   alt={item.name}
                   className="h-full w-full object-cover"
                 />
@@ -164,7 +192,7 @@ const MediaLibrary = () => {
                   {filteredMedia.map((item) => (
                     <tr key={item.id} className="border-b hover:bg-muted/50">
                       <td className="py-3 px-4">
-                        <img src={item.url} alt={item.name} className="h-12 w-12 object-cover rounded" />
+                        <img src={getImageUrl(item.url)} alt={item.name} className="h-12 w-12 object-cover rounded" />
                       </td>
                       <td className="py-3 px-4 font-medium">{item.name}</td>
                       <td className="py-3 px-4">{item.size}</td>
@@ -201,7 +229,7 @@ const MediaLibrary = () => {
               <X className="h-5 w-5" />
             </Button>
             <img
-              src={selectedMedia.url}
+              src={getImageUrl(selectedMedia.url)}
               alt={selectedMedia.name}
               className="max-w-full max-h-[90vh] object-contain rounded-lg"
               onClick={(e) => e.stopPropagation()}

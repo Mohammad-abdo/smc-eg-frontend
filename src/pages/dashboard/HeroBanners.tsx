@@ -6,15 +6,58 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { cn } from '@/lib/utils';
+import { cn, getImageUrl } from '@/lib/utils';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useBanners, useCreateBanner, useUpdateBanner, useDeleteBanner } from '@/hooks/useApi';
 import { toast } from 'sonner';
+
+// Banner Image Component with error handling
+const BannerImage = ({ image, title }: { image: string | null | undefined; title: string }) => {
+  const [imageError, setImageError] = useState(false);
+  const imageUrl = image ? getImageUrl(image) : null;
+
+  if (!imageUrl || imageError) {
+    if (imageError) {
+      console.error('BannerImage: Failed to load image:', imageUrl, 'Original path:', image);
+    }
+    return (
+      <div className="h-full w-full flex items-center justify-center bg-muted">
+        <div className="text-center">
+          <ImageIcon className="h-12 w-12 mx-auto text-muted-foreground mb-2" />
+          <p className="text-xs text-muted-foreground">No Image</p>
+          {imageError && (
+            <p className="text-xs text-red-500 mt-1">Failed to load</p>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <img 
+      src={imageUrl} 
+      alt={title} 
+      className="h-full w-full object-cover"
+      onError={(e) => {
+        console.error('BannerImage: Image load error:', {
+          imageUrl,
+          originalPath: image,
+          error: e
+        });
+        setImageError(true);
+      }}
+      onLoad={() => {
+        console.log('BannerImage: Image loaded successfully:', imageUrl);
+      }}
+    />
+  );
+};
 
 const HeroBanners = () => {
   const { t, isRTL } = useLanguage();
   const [editingBanner, setEditingBanner] = useState<any>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [imageFile, setImageFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const { data: banners = [], isLoading } = useBanners();
@@ -24,24 +67,52 @@ const HeroBanners = () => {
 
   const handleEdit = (banner: any) => {
     setEditingBanner({ ...banner });
+    setImageFile(null); // Reset image file when editing
     setIsDialogOpen(true);
   };
 
   const handleSave = async () => {
     if (editingBanner) {
+      // Validation: Ensure required fields are filled
+      if (!editingBanner.image && !imageFile) {
+        toast.error('Please upload an image for the banner');
+        return;
+      }
+      
+      if (!editingBanner.title || editingBanner.title.trim() === '') {
+        toast.error('Please enter a title (English) for the banner');
+        return;
+      }
+
       try {
+        console.log('Saving banner:', {
+          hasId: !!editingBanner.id,
+          hasImageFile: !!imageFile,
+          imageFileSize: imageFile?.size,
+          imageFileName: imageFile?.name,
+          bannerData: { ...editingBanner, image: editingBanner.image ? 'base64 preview' : null }
+        });
+
         if (editingBanner.id) {
-          await updateBanner.mutateAsync({ id: editingBanner.id, updates: editingBanner });
+          await updateBanner.mutateAsync({ 
+            id: editingBanner.id, 
+            updates: editingBanner,
+            imageFile: imageFile || undefined
+          });
           toast.success('Banner updated successfully');
         } else {
-          await createBanner.mutateAsync(editingBanner);
+          await createBanner.mutateAsync({
+            banner: editingBanner,
+            imageFile: imageFile || undefined
+          });
           toast.success('Banner created successfully');
         }
         setIsDialogOpen(false);
         setEditingBanner(null);
-      } catch (error) {
+        setImageFile(null);
+      } catch (error: any) {
         console.error('Error saving banner:', error);
-        const errorMessage = error?.message || 'Unknown error';
+        const errorMessage = error?.response?.data?.error || error?.message || 'Unknown error';
         toast.error(`Failed to save banner: ${errorMessage}`);
       }
     }
@@ -70,6 +141,7 @@ const HeroBanners = () => {
       order: banners.length + 1,
       active: true,
     });
+    setImageFile(null);
     setIsDialogOpen(true);
   };
 
@@ -99,8 +171,8 @@ const HeroBanners = () => {
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         {banners.map((banner) => (
           <Card key={banner.id} className="overflow-hidden">
-            <div className="relative h-48">
-              <img src={banner.image} alt={banner.title} className="h-full w-full object-cover" />
+            <div className="relative h-48 bg-muted">
+              <BannerImage image={banner.image} title={banner.title} />
               <div className="absolute top-2 right-2">
                 <span className="bg-black/70 text-white text-xs px-2 py-1 rounded">
                   Order: {banner.order}
@@ -152,7 +224,10 @@ const HeroBanners = () => {
                         type="button"
                         variant="ghost"
                         size="icon"
-                        onClick={() => setEditingBanner({ ...editingBanner, image: '' })}
+                        onClick={() => {
+                          setEditingBanner({ ...editingBanner, image: '' });
+                          setImageFile(null);
+                        }}
                         className="absolute -top-2 -right-2 bg-red-500/80 hover:bg-red-500 text-white h-6 w-6 rounded-full"
                       >
                         <X className="h-3 w-3" />
@@ -171,17 +246,20 @@ const HeroBanners = () => {
                       onChange={(e) => {
                         const file = e.target.files?.[0];
                         if (file) {
-                          if (file.size > 2 * 1024 * 1024) {
-                            toast.error('Image size must be less than 2MB');
+                          if (file.size > 10 * 1024 * 1024) {
+                            toast.error('Image size must be less than 10MB');
                             return;
                           }
+                          // Store the file for upload
+                          setImageFile(file);
+                          // Also create a preview URL for display
                           const reader = new FileReader();
                           reader.onloadend = () => {
                             setEditingBanner({
                               ...editingBanner,
-                              image: reader.result as string,
+                              image: reader.result as string, // Preview only
                             });
-                            toast.success('Image uploaded successfully');
+                            toast.success('Image selected successfully');
                           };
                           reader.onerror = () => {
                             toast.error('Error reading image file');

@@ -4,7 +4,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { getLocalizedLink } from '@/hooks/useLocalizedNavigate';
-import { cn } from '@/lib/utils';
+import { cn, getImageUrl } from '@/lib/utils';
 import { useNews } from '@/hooks/useApi';
 import slideOne from '@/assets/manganese/one.jpeg';
 import slideTwo from '@/assets/manganese/two.jpg';
@@ -208,7 +208,7 @@ const PostDetail = () => {
         {/* Hero Image */}
         <div className="relative h-96 mb-8 overflow-hidden rounded-[32px] border border-border shadow-2xl">
           <img
-            src={postImage}
+            src={post?.image ? getImageUrl(post.image) : postImage}
             alt={postTitle}
             className="h-full w-full object-cover"
           />

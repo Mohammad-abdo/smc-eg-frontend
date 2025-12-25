@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { getLocalizedLink } from '@/hooks/useLocalizedNavigate';
-import { cn } from '@/lib/utils';
+import { cn, getImageUrl } from '@/lib/utils';
 import { useProducts, useProductCategories } from '@/hooks/useApi';
 import heroSlideOne from '@/assets/manganese/one.jpeg';
 import heroSlideTwo from '@/assets/manganese/two.jpg';
@@ -96,15 +96,31 @@ const Products = ({ type }: ProductsProps) => {
         };
         const ProductIcon = iconMap[product.name] || Factory;
         // Use product.image if it exists and is not empty, otherwise undefined (will show placeholder)
-        const productImage = (product.image && product.image.trim() !== '') 
+        const productImage = (product.image && product.image.trim() !== '' && product.image !== 'null' && product.image !== 'undefined') 
           ? product.image 
           : undefined;
+        
+        // Debug logging
+        if (productImage) {
+          console.log('Product image found:', {
+            productId: product.id,
+            productName: product.name,
+            imagePath: productImage,
+            fullUrl: getImageUrl(productImage),
+          });
+        } else {
+          console.log('Product has no image:', {
+            productId: product.id,
+            productName: product.name,
+            rawImage: product.image,
+          });
+        }
         
         return {
           id: product.id.toString(),
           name: lang === 'ar' ? product.nameAr : product.name,
           description: lang === 'ar' ? product.descriptionAr : product.description,
-          image: productImage || product.image,
+          image: productImage,
           updated_at: product.updated_at,
           icon: ProductIcon,
           product: product,
@@ -317,14 +333,17 @@ const Products = ({ type }: ProductsProps) => {
                     <div className="relative h-64 overflow-hidden bg-muted">
                       {product.image ? (
                         <img
-                          src={product.image.startsWith('data:image') || product.image.startsWith('data:') 
-                            ? product.image 
-                            : `${product.image}${product.image.includes('?') ? '&' : '?'}_cb=${product.updated_at ? new Date(product.updated_at).getTime() : Date.now()}`}
+                          src={getImageUrl(product.image)}
                           alt={product.name}
                           className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
                           loading="lazy"
                           key={`${product.id}-${product.updated_at || Date.now()}`}
                           onError={(e) => {
+                            console.error('Product image load error:', {
+                              productId: product.id,
+                              imagePath: product.image,
+                              fullUrl: getImageUrl(product.image),
+                            });
                             const target = e.target as HTMLImageElement;
                             target.style.display = 'none';
                             const placeholder = target.nextElementSibling as HTMLElement;
@@ -332,10 +351,16 @@ const Products = ({ type }: ProductsProps) => {
                               placeholder.style.display = 'flex';
                             }
                           }}
+                          onLoad={() => {
+                            console.log('Product image loaded successfully:', {
+                              productId: product.id,
+                              imagePath: product.image,
+                            });
+                          }}
                         />
                       ) : null}
                       {!product.image && (
-                        <div className="h-full w-full flex items-center justify-center bg-muted placeholder-fallback">
+                        <div className="h-full w-full flex items-center justify-center bg-muted placeholder-fallback" style={{ display: product.image ? 'none' : 'flex' }}>
                           <ProductIcon className="h-16 w-16 text-muted-foreground" />
                         </div>
                       )}
@@ -490,12 +515,17 @@ const Products = ({ type }: ProductsProps) => {
                   <div className="relative h-64 overflow-hidden bg-muted">
                     {product.image ? (
                       <img
-                        src={product.image.includes('data:image') ? product.image : `${product.image}${product.image.includes('?') ? '&' : '?'}_cb=${product.updated_at ? new Date(product.updated_at).getTime() : Date.now()}`}
+                        src={getImageUrl(product.image)}
                         alt={product.name}
                         className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
                         loading="lazy"
                         key={`${product.id}-${product.updated_at || Date.now()}`}
                         onError={(e) => {
+                          console.error('Product image load error:', {
+                            productId: product.id,
+                            imagePath: product.image,
+                            fullUrl: getImageUrl(product.image),
+                          });
                           const target = e.target as HTMLImageElement;
                           target.style.display = 'none';
                           const placeholder = target.nextElementSibling as HTMLElement;
@@ -503,10 +533,16 @@ const Products = ({ type }: ProductsProps) => {
                             placeholder.style.display = 'flex';
                           }
                         }}
+                        onLoad={() => {
+                          console.log('Product image loaded successfully:', {
+                            productId: product.id,
+                            imagePath: product.image,
+                          });
+                        }}
                       />
                     ) : null}
                     {!product.image && (
-                      <div className="h-full w-full flex items-center justify-center bg-muted placeholder-fallback">
+                      <div className="h-full w-full flex items-center justify-center bg-muted placeholder-fallback" style={{ display: product.image ? 'none' : 'flex' }}>
                         <ProductIcon className="h-16 w-16 text-muted-foreground" />
                       </div>
                     )}

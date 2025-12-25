@@ -3,7 +3,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { getLocalizedLink } from '@/hooks/useLocalizedNavigate';
 import { useProducts, useProductCategories } from '@/hooks/useApi';
 import { Card, CardContent, CardTitle } from '@/components/ui/card';
-import { cn } from '@/lib/utils';
+import { cn, getImageUrl } from '@/lib/utils';
 import { ArrowLeft, Loader2, Factory, Package } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
@@ -114,17 +114,29 @@ const CategoryProducts = () => {
                     <div className="relative h-64 overflow-hidden bg-muted">
                       {productImage ? (
                         <img
-                          src={productImage.startsWith('data:image') || productImage.startsWith('data:')
-                            ? productImage
-                            : `${productImage}${productImage.includes('?') ? '&' : '?'}_cb=${product.updated_at ? new Date(product.updated_at).getTime() : Date.now()}`}
+                          src={getImageUrl(productImage)}
                           alt={language === 'ar' ? product.nameAr : product.name}
                           className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
                           loading="lazy"
                           key={`${product.id}-${product.updated_at || Date.now()}`}
                           onError={(e) => {
-                            console.error('Category product image load error');
+                            console.error('Category product image load error:', {
+                              productId: product.id,
+                              imagePath: productImage,
+                              fullUrl: getImageUrl(productImage),
+                            });
                             const target = e.target as HTMLImageElement;
                             target.style.display = 'none';
+                            const placeholder = target.nextElementSibling as HTMLElement;
+                            if (placeholder && placeholder.classList.contains('placeholder-fallback')) {
+                              placeholder.style.display = 'flex';
+                            }
+                          }}
+                          onLoad={() => {
+                            console.log('Category product image loaded successfully:', {
+                              productId: product.id,
+                              imagePath: productImage,
+                            });
                           }}
                         />
                       ) : (

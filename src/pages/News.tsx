@@ -4,7 +4,7 @@ import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card'
 import { Button } from '@/components/ui/button';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { getLocalizedLink } from '@/hooks/useLocalizedNavigate';
-import { cn } from '@/lib/utils';
+import { cn, getImageUrl } from '@/lib/utils';
 import { useNews } from '@/hooks/useApi';
 import slideOne from '@/assets/manganese/one.jpeg';
 import slideTwo from '@/assets/manganese/two.jpg';
@@ -66,7 +66,7 @@ const News = () => {
             <Card key={item.id} className="flex flex-col overflow-hidden bg-white hover:shadow-xl transition-all">
               <div className="group relative h-48 w-full overflow-hidden">
                 <img
-                  src={item.image}
+                  src={getImageUrl(item.image)}
                   alt={item.title}
                   className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
                 />

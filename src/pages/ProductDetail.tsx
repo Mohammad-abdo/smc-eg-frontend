@@ -4,7 +4,7 @@ import { ArrowLeft, Factory, Sparkles, Beaker, Flame, CheckCircle2 } from 'lucid
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { cn } from '@/lib/utils';
+import { cn, getImageUrl } from '@/lib/utils';
 import { useProduct } from '@/hooks/useApi';
 import heroSlideOne from '@/assets/manganese/one.jpeg';
 import heroSlideTwo from '@/assets/manganese/two.jpg';
@@ -142,9 +142,7 @@ const ProductDetail = () => {
               <div className="relative h-96 lg:h-[500px] overflow-hidden rounded-[32px] border border-border shadow-2xl bg-muted">
                 {productImage ? (
                   <img
-                    src={productImage.startsWith('data:image') || productImage.startsWith('data:') 
-                      ? productImage 
-                      : `${productImage}${productImage.includes('?') ? '&' : '?'}_cb=${Date.now()}`}
+                    src={getImageUrl(productImage)}
                     alt={productName || 'Product image'}
                     className="h-full w-full object-cover"
                     key={`${productId}-${product?.updated_at || Date.now()}`}

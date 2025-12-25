@@ -8,7 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { cn } from '@/lib/utils';
+import { cn, getImageUrl } from '@/lib/utils';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useProducts, useCreateProduct, useUpdateProduct, useDeleteProduct, useProductCategories } from '@/hooks/useApi';
 import { toast } from 'sonner';
@@ -18,6 +18,7 @@ const ProductsManagement = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [editingProduct, setEditingProduct] = useState<any>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [imageFile, setImageFile] = useState<File | null>(null); // State to hold the actual file
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const { data: products = [], isLoading } = useProducts();
@@ -57,21 +58,37 @@ const ProductsManagement = () => {
       gallery = [];
     }
     setEditingProduct({ ...product, specifications_table: specsTable, gallery });
+    setImageFile(null); // Reset image file when editing
     setIsDialogOpen(true);
   };
 
   const handleSave = async () => {
     if (editingProduct) {
       try {
+        // Prepare product data without base64 image if we have a file
+        const productData = { ...editingProduct };
+        if (imageFile && productData.image && productData.image.startsWith('data:image')) {
+          // Remove base64 preview from data - we'll send the file instead
+          // Keep the image field for backward compatibility, but it won't be used if file is provided
+        }
+        
         if (editingProduct.id) {
-          await updateProduct.mutateAsync({ id: editingProduct.id, updates: editingProduct });
+          await updateProduct.mutateAsync({ 
+            id: editingProduct.id, 
+            updates: productData,
+            imageFile: imageFile || undefined
+          });
           toast.success('Product updated successfully');
         } else {
-          await createProduct.mutateAsync(editingProduct);
+          await createProduct.mutateAsync({ 
+            product: productData,
+            imageFile: imageFile || undefined
+          });
           toast.success('Product created successfully');
         }
         setIsDialogOpen(false);
         setEditingProduct(null);
+        setImageFile(null); // Clear file after save
       } catch (error: any) {
         console.error('Error saving product:', {
           error,
@@ -132,6 +149,7 @@ const ProductsManagement = () => {
       gallery: [],
       specifications_table: null,
     });
+    setImageFile(null); // Reset image file when adding new
     setIsDialogOpen(true);
   };
 
@@ -333,15 +351,24 @@ const ProductsManagement = () => {
                   {editingProduct.image ? (
                     <div className="relative">
                       <img
-                        src={editingProduct.image}
+                        src={getImageUrl(editingProduct.image)}
                         alt="Product"
                         className="w-32 h-32 object-cover rounded-lg border border-white/20"
+                        onError={(e) => {
+                          console.error('Failed to load product image:', editingProduct.image);
+                          // Fallback: hide image and show placeholder
+                          const target = e.target as HTMLImageElement;
+                          target.style.display = 'none';
+                        }}
                       />
                       <Button
                         type="button"
                         variant="ghost"
                         size="icon"
-                        onClick={() => setEditingProduct({ ...editingProduct, image: '' })}
+                        onClick={() => {
+                          setEditingProduct({ ...editingProduct, image: '' });
+                          setImageFile(null); // Clear image file
+                        }}
                         className="absolute -top-2 -right-2 bg-red-500/80 hover:bg-red-500 text-white h-6 w-6 rounded-full"
                       >
                         <X className="h-3 w-3" />
@@ -360,17 +387,19 @@ const ProductsManagement = () => {
                       onChange={(e) => {
                         const file = e.target.files?.[0];
                         if (file) {
-                          if (file.size > 2 * 1024 * 1024) {
-                            toast.error('Image size must be less than 2MB');
+                          if (file.size > 10 * 1024 * 1024) { // Increased limit to 10MB
+                            toast.error('Image size must be less than 10MB');
                             return;
                           }
+                          setImageFile(file); // Store the file
+                          // Also create a preview URL for display
                           const reader = new FileReader();
                           reader.onloadend = () => {
                             setEditingProduct({
                               ...editingProduct,
-                              image: reader.result as string,
+                              image: URL.createObjectURL(file), // Use URL.createObjectURL for preview
                             });
-                            toast.success('Image uploaded successfully');
+                            toast.success('Image selected successfully');
                           };
                           reader.onerror = () => {
                             toast.error('Error reading image file');
