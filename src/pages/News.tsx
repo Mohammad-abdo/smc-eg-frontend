@@ -29,7 +29,7 @@ const News = () => {
       excerpt: language === 'ar' ? (item.contentAr?.substring(0, 150) || '') : (item.content?.substring(0, 150) || ''),
       image: item.image || defaultImages[item.id % defaultImages.length],
     }));
-
+  console.log(newsItemsFromAPI);
   return (
     <div className="min-h-screen pt-32 pb-20">
       <div className="container mx-auto px-4">

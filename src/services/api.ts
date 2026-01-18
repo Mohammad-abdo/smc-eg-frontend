@@ -162,6 +162,25 @@ export interface Client {
   status: "active" | "inactive";
 }
 
+export interface SiteSetting {
+  id: number;
+  key: string;
+  valueEn: string | null;
+  valueAr: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface PageContent {
+  id: number;
+  page: string;
+  key: string;
+  valueEn: string | null;
+  valueAr: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
 // Helper function for API calls
 async function apiCall<T>(endpoint: string, options?: RequestInit): Promise<T> {
   const token =
@@ -724,4 +743,43 @@ export const productCategoriesAPI = {
     }),
   delete: (id: number) =>
     apiCall<void>(`/product-categories/${id}`, { method: "DELETE" }),
+};
+
+// Settings API
+export const settingsAPI = {
+  getAll: () => apiCall<SiteSetting[]>("/settings"),
+  getByKey: (key: string) => apiCall<SiteSetting>(`/settings/${key}`),
+  createOrUpdate: (setting: { key: string; valueEn?: string | null; valueAr?: string | null }) =>
+    apiCall<SiteSetting>("/settings", {
+      method: "POST",
+      body: JSON.stringify(setting),
+    }),
+};
+
+// Page Content API
+export const pageContentAPI = {
+  getAll: (page?: string) => {
+    const url = page ? `/page-content?page=${page}` : "/page-content";
+    return apiCall<PageContent[]>(url);
+  },
+  getByPage: (page: string) => apiCall<PageContent[]>(`/page-content/page/${page}`),
+  getByKey: (page: string, key: string) =>
+    apiCall<PageContent>(`/page-content/page/${page}/key/${key}`),
+  createOrUpdate: (content: { page: string; key: string; valueEn?: string | null; valueAr?: string | null }) =>
+    apiCall<PageContent>("/page-content", {
+      method: "POST",
+      body: JSON.stringify(content),
+    }),
+  update: (page: string, key: string, content: { valueEn?: string | null; valueAr?: string | null }) =>
+    apiCall<PageContent>(`/page-content/page/${page}/key/${key}`, {
+      method: "PUT",
+      body: JSON.stringify(content),
+    }),
+  delete: (page: string, key: string) =>
+    apiCall<void>(`/page-content/page/${page}/key/${key}`, { method: "DELETE" }),
+  bulkUpdate: (contents: Array<{ page: string; key: string; valueEn?: string | null; valueAr?: string | null }>) =>
+    apiCall<PageContent[]>("/page-content/bulk", {
+      method: "POST",
+      body: JSON.stringify(contents),
+    }),
 };
