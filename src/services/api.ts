@@ -4,7 +4,7 @@
 // IMPORTANT: Set VITE_API_URL in Vercel Environment Variables if you need to override:
 // VITE_API_URL=https://smc-eg.com/api
 const API_BASE_URL =
-  import.meta.env.VITE_API_URL || "https://back.smc-eg.com/api";
+  import.meta.env.VITE_API_URL || "http://localhost:3000/api";
 
 // Types
 export interface ProductCategory {

@@ -27,7 +27,7 @@ const UsersManagement = () => {
   const permissions = [
     { id: 'products', label: language === 'ar' ? 'إدارة المنتجات' : 'Manage Products' },
     { id: 'news', label: language === 'ar' ? 'إدارة الأخبار' : 'Manage News' },
-    { id: 'users', label: language === 'ar' ? 'إدارة المستخدمين' : 'Manage Users' },
+    { id: 'users', label: language === 'ar' ? 'إدارة المستخدمين' : 'Manage Users' },  
     { id: 'settings', label: language === 'ar' ? 'إدارة الإعدادات' : 'Manage Settings' },
     { id: 'contacts', label: language === 'ar' ? 'عرض جهات الاتصال' : 'View Contacts' },
     { id: 'complaints', label: language === 'ar' ? 'عرض الشكاوى' : 'View Complaints' },

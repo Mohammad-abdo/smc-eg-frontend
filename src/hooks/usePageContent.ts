@@ -60,7 +60,7 @@ const defaultContent: PageContent = {
 export const usePageContent = (
   page: string,
   key: string,
-  fallback?: string
+  fallback?: string,
 ): string => {
   const { language } = useLanguage();
   const [content, setContent] = useState<PageContent>(defaultContent);
@@ -234,12 +234,23 @@ export const useSettings = () => {
         const parsePhoneNumbers = (key: string): any[] => {
           const setting = settingsObj[key];
           if (!setting) return [];
-          const value = language === "ar" ? setting.valueAr : setting.valueEn;
+
+          let value = setting.valueEn || setting.valueAr;
           if (!value) return [];
+
           try {
-            return JSON.parse(value);
-          } catch {
-            return [];
+            let parsed = typeof value === "string" ? JSON.parse(value) : value;
+
+            if (typeof parsed === "string") {
+              parsed = JSON.parse(parsed);
+            }
+
+            return Array.isArray(parsed)
+              ? parsed
+              : [{ number: value, label: "" }];
+          } catch (e) {
+            console.error("Parsing error for key:", key, e);
+            return [{ number: value, label: "" }];
           }
         };
 
@@ -287,7 +298,10 @@ export const useSettings = () => {
           faxNumbersSales: parsePhoneNumbers("fax_numbers_sales"),
           phoneNumbersAdmin: parsePhoneNumbers("phone_numbers_admin"),
           faxNumbersAdmin: parsePhoneNumbers("fax_numbers_admin"),
-          complaintsEmail: settingsObj.complaints_email?.[language === "ar" ? "valueAr" : "valueEn"] || "",
+          complaintsEmail:
+            settingsObj.complaints_email?.[
+              language === "ar" ? "valueAr" : "valueEn"
+            ] || "",
         };
 
         setSettings(newSettings);
@@ -395,7 +409,10 @@ export const useSettings = () => {
             faxNumbersSales: parsePhoneNumbers("fax_numbers_sales"),
             phoneNumbersAdmin: parsePhoneNumbers("phone_numbers_admin"),
             faxNumbersAdmin: parsePhoneNumbers("fax_numbers_admin"),
-            complaintsEmail: settingsObj.complaints_email?.[language === "ar" ? "valueAr" : "valueEn"] || "",
+            complaintsEmail:
+              settingsObj.complaints_email?.[
+                language === "ar" ? "valueAr" : "valueEn"
+              ] || "",
           };
 
           setSettings(newSettings);
